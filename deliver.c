@@ -32,17 +32,17 @@ int main(int argc, char const *argv[]){
 	}
 
     //Initialize character pointers to the arguments
-    char* ipAddress = argv[1];
-    char* portPointer = argv[2];
+    const char* ipAddress = argv[1];
+    const char* portPointer = argv[2];
     
     //Recieve input from the user and store the input
-    fprintf("Enter file name to transfer in the format: ftp <file name>\n");
+    printf("Enter file name to transfer in the format: ftp <file name>\n");
     char ftpInput[50], fileName[50];
     scanf("%s %s", ftpInput, fileName);
 
     //Verifying the input for ftp
     if(strcmp(ftpInput, "ftp")!= 0){
-        fprintf("Invalid Command: %s\n", ftpInput);
+        printf("Invalid Command: %s\n", ftpInput);
         return 0;
     }
 
@@ -83,7 +83,7 @@ int main(int argc, char const *argv[]){
 
     //Check whether the correct message is recieved
     if (strcmp(receivedMessage, "yes") == 0) {
-        fprintf("A file transfer can start.\n");
+        printf("A file transfer can start.\n");
     }
     
     //Free the address info memory
