@@ -18,7 +18,9 @@ int main(int argc, char const *argv[]){
     int sockfd; //Socket File Descriptor
 
     const char msg_yes[] = "yes";
-    char msg_ftp[] = "ftp";
+const char msg_no[] = "no";
+    const char msg_ftp[] = "ftp";
+
 
     struct addrinfo hints; //Used to provide hints concerning the type of socket that the caller supports or wishes to use
     struct addrinfo *res; //Pointer to a struct sockaddr containing the destination port and IP Address
@@ -45,10 +47,10 @@ int main(int argc, char const *argv[]){
 
     //Verifying the input for ftp
     if(strcmp(ftpInput, msg_ftp)!= 0){
+printf("no\n");
         printf("Invalid Command: %s\n", ftpInput);
         return 0;
     }
-
     //Checking if the input file actually exists
     if(access(fileName, F_OK) != 0){
         fprintf(stderr, "File not found\n");
@@ -71,20 +73,24 @@ int main(int argc, char const *argv[]){
 
     //Message variables
     char receivedMessage[MAXBUFLEN]; 
-    char *msg_ftp;
+    //char *ftpResponse;
     
     int receivedBytes;
 
     //Sending ftp response
+    //ftpResponse = msg_ftp;
     sendto(sockfd, msg_ftp, strlen(msg_ftp), 0, res->ai_addr, res->ai_addrlen);
 
     socklen_t  addrLen = sizeof(struct sockaddr_storage);
 
     receivedBytes = recvfrom(sockfd, receivedMessage, MAXBUFLEN-1 , 0, (struct sockaddr *)&serverSockAddr, &addrLen);
     receivedMessage[receivedBytes] = '\0';
+	
+
 
     //Check whether the correct message is recieved
     if (strcmp(receivedMessage, msg_yes) == 0) {
+	printf("%s\n",msg_yes);
         printf("A file transfer can start.\n");
     }
     
