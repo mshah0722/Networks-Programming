@@ -1,91 +1,80 @@
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <unistd.h> 
-#include <string.h> 
-#include <sys/types.h> 
-#include <sys/socket.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #include <netdb.h>
 
-int main(int argc, char **argv){
+#define MAXLEN 4096
+
+int main(int argc, char const *argv[]){
     
-    struct sockaddr_in servaddr, cliaddr;
-    struct addrinfo hints, *res, *p;
-    struct addrinfo *servinfo; // will point to the results
-    socklen_t clilen, addr_size;
-
-
-    int status;
-    int port = atoi(argv[1]); // get the port
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0); // get the socket
-    char *yes_msg = "yes";
-    char *no_msg = "no";
-
-    if (argc != 2) {
-        fprintf(stderr,"usage: showip hostname\n");
+    int port;
+    
+    // switch(argc) {
+        // case 2:
+            // port = atoi(argv[1]);
+            // break;
+        // default:
+            // fprintf(stderr, "usage: server (udp listen port)\n");
+            // return(0);
+    // }
+    
+	if(argc == 2) //check for correct arguments
+		port = atoi(argv[1]);
+	else{//print error message and return
+		printf(stderr, "incorrect arguments amoung. usage: server <udp listen port>\n");
+		return 1;
+	}
+	
+    int socketDescriptor;
+    
+    //Creates a ipv4 dgram udp socket
+    if ((socketDescriptor = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
+        fprintf(stderr, "socket error\n");
         return 1;
     }
-
-    // check for address
-    if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-        return 2;
+    
+    struct sockaddr_in serverAddress; 
+    
+    
+    serverAddress.sin_family = AF_INET;//sets to IPV4
+    
+    serverAddress.sin_port = htons(port);//set port to network byte order
+    
+    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);// references  IP address (in Network Byte Order)
+    //Sets it to the right memory space
+    memset(serverAddress.sin_zero, 0, sizeof(serverAddress.sin_zero));
+    
+    //Assigns address to the socket
+    if (bind(socketDescriptor, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) == -1 ) {
+        fprintf(stderr, "Can't bind name to socket\n");
+        return 1;
     }
     
-    // try opening the socket, print an error otherwise
-    if (sockfd < 0) { 
-        perror("failed to create a socket!!"); 
-        exit(1); 
-    }
-
-    // set port numbers (stuff that is fixed)
-    servaddr.sin_family    = AF_INET; // IPv4 
-    servaddr.sin_addr.s_addr = INADDR_ANY; 
-    servaddr.sin_port = htons(port); 
-    memset(servaddr.sin_zero, '\0', sizeof servaddr.sin_zero);
-
-    int binder = bind(sockfd, (struct sockaddr *)&servaddr, sizeof servaddr);
-    // check for bind error
-    if (binder == -1) {
-        close(sockfd);
-        perror("failed to bind!!");
-        exit(1);
+    
+    char message_buffer[MAXLEN] = {0};
+    struct sockaddr_in clientAddress;
+    unsigned clientMessageLength = sizeof(struct sockaddr_in);
+    
+    if(recvfrom(socketDescriptor, message_buffer, MAXLEN, 0, (struct sockaddr*) &clientAddress, &clientMessageLength) < 0) {
+        fprintf(stderr, "Can't receive data\n");
+        return 1;
     }
     
-    listen(sockfd, BACKLOG);
-    addr_size = sizeof servaddr;
-    int new_fd = accept(sockfd, (struct sockaddr *)&servaddr, &addr_size);
-    if (new_fd == -1) {
-        perror("failed to accept");
-        exit(1);
-    }
-
-    int BUF_SIZE = 50; // len is the maximum length of the buffer which we don't know
-
-    char buffer[BUF_SIZE]; // = 0; // buf is the buffer to read the information into. Gonna store stuff
-    int received = recvfrom(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &cliaddr, &clilen); 
-    if(received == -1){
-        perror("failed to receive from client");
-        exit(1);
-    }
-
-    if(strcmp(buffer, "ftp")){
-        int sentYes = sendto(sockfd, yes_msg, strlen(yes_msg), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        if(sentYes == -1){
-            perror("failed to send yes");
-            exit(1);
+    if (strcmp(message_buffer, "ftp") == 0) {
+        if (sendto(socketDescriptor, "yes", strlen("yes"), 0, (struct sockaddr*) &clientAddress, clientMessageLength) == -1) {
+                fprintf(stderr, "Message not sent to client\n");
+                return(1);
         }
-            
-    } else{
-        int sentNo = sendto(sockfd, no_msg, strlen(no_msg), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        if(sentNo == -1){
-            perror("failed to send no");
-            exit(1);
+        else if (sendto(socketDescriptor, "no", strlen("no"), 0, (struct sockaddr*) &clientAddress, clientMessageLength) == -1) {
+            fprintf(stderr, "Message not sent to client\n");
+            return 1;
         }
     }
-    
-    // close up
-    close(sockfd); 
 
+    close(socketDescriptor);
     return 0;
 }
