@@ -1,95 +1,84 @@
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <unistd.h> 
-#include <string.h> 
-#include <sys/types.h> 
-#include <sys/socket.h> 
-#include <arpa/inet.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netinet/in.h>
-#include <netdb.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <netdb.h> 
 
-int main(int argc, char **argv){
-    int sockfd;
+#define MAXLEN 4096
 
-    struct sockaddr_in servaddr, cliaddr;
-    struct addrinfo hints, *res, *p;
-    struct addrinfo *servinfo; // will point to the results
-    socklen_t clilen, addr_size;
+int main(int argc, char const *argv[]){
+    int port;
 
-    int status;
-    int port = atoi(argv[1]); // get the port
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0); // get the socket
-    char *yes_msg = "yes";
-    char *no_msg = "no";
-
-    if (argc != 2) {
-        fprintf(stderr,"usage: showip hostname\n");
-        return 1;
+    //Obtaining port number from argument
+    switch(argc) {
+        case 3:
+            port = atoi(argv[2]);
+            break;
+        default:
+            fprintf(stderr, "usage: deliver -<server address> -<server port number>\n");
+            exit(0);
     }
-
-    // check for address
-    if ((status = getaddrinfo(argv[1], NULL, &hints, &res)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
-        return 2;
-    }
+    char* ipAddress = argv[1];
+    char* portPointer = argv[2];
     
-    // try opening the socket, print an error otherwise
-    if (sockfd < 0) { 
-        perror("failed to create a socket!!"); 
-        exit(1); 
+    printf("Enter filename to transfer in the format: ftp <filename>\n");
+    char ftpInput[50], fileName[50];
+    scanf("%s %s", ftpInput, fileName);
+
+    //Checking the input for ftp
+    if(strcmp(ftpInput, "ftp")!= 0){
+        printf("Invalid Command: %s\n", ftpInput);
+        exit(0);
     }
 
-    // set port numbers (stuff that is fixed)
-    servaddr.sin_family    = AF_INET; // IPv4 
-    servaddr.sin_addr.s_addr = INADDR_ANY; 
-    servaddr.sin_port = htons(port); 
-    memset(servaddr.sin_zero, '\0', sizeof servaddr.sin_zero);
-
-    int binder = bind(sockfd, (struct sockaddr *)&servaddr, sizeof servaddr);
-    // check for bind error
-    if (binder == -1) {
-        close(sockfd);
-        perror("failed to bind!!");
-        exit(1);
-    }
-    
-    listen(sockfd, BACKLOG);
-    addr_size = sizeof servaddr;
-    int new_fd = accept(sockfd, (struct sockaddr *)&servaddr, &addr_size);
-    if (new_fd == -1) {
-        perror("failed to accept");
-        exit(1);
+    //Finding the file
+    if(access(fileName, F_OK) != 0){
+        fprintf(stderr, "File not found\n");
+        exit(0);
     }
 
-    int BUF_SIZE = 50; // len is the maximum length of the buffer which we don't know
+    int status, socketDescriptor;
+    struct addrinfo hints;
+    struct addrinfo *serverAddress;
+    struct sockaddr_storage serverSocketAddress;     //connector's addr info
 
-    char buffer[BUF_SIZE]; // = 0; // buf is the buffer to read the information into. Gonna store stuff
-    int received = recvfrom(sockfd, buffer, BUF_SIZE, 0, (struct sockaddr *) &cliaddr, &clilen);
-     
-    if(received == -1){
-        perror("failed to receive from client");
+
+    memset(&hints, 0, sizeof hints);
+
+    hints.ai_family = AF_UNSPEC;        //IPv4 or IPv6
+    hints.ai_socktype = SOCK_DGRAM;     //Connectionless data transfer of fixed max length datagrams
+    hints.ai_protocol = IPPROTO_UDP;    //UDP
+
+    status = getaddrinfo(ipAddress, portPointer, &hints, &serverAddress);
+
+    //Creating the UDP socket
+    if ((socketDescriptor = socket(serverAddress->ai_family,serverAddress->ai_socktype, serverAddress->ai_protocol)) == -1) {
+        fprintf(stderr, "Error with socket\n");
         exit(1);
     }
 
-    if(strcmp(buffer, "ftp")){
-        int sentYes = sendto(sockfd, yes_msg, strlen(yes_msg), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        if(sentYes == -1){
-            perror("failed to send yes");
-            exit(1);
-        }
-            
-    } 
-    
-    else{
-        int sentNo = sendto(sockfd, no_msg, strlen(no_msg), 0, (struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        if(sentNo == -1){
-            perror("failed to send no");
-            exit(1);
-        }
-    }
-    
-    //Closing the connection
-    close(sockfd); 
+    //message variables
+    char messageReceived[MAXLEN], *ftpResponse;
+    int bytesRecveived;
 
+    //Sending ftp response
+    ftpResponse = "ftp";
+    sendto(socketDescriptor, ftpResponse, strlen(ftpResponse), 0, serverAddress->ai_addr, serverAddress->ai_addrlen);
+
+    socklen_t  addressLength = sizeof(struct sockaddr_storage);
+    bytesRecveived = recvfrom(socketDescriptor, messageReceived, MAXLEN-1 , 0, (struct sockaddr *)&serverSocketAddress, &addressLength);
+    messageReceived[bytesRecveived] = '\0';
+
+
+    if (strcmp(messageReceived, "yes") == 0) {
+        printf("A file transfer can start.\n");
+    }
+    freeaddrinfo(serverAddress);
+    close(socketDescriptor);
     return 0;
 }
