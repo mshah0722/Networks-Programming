@@ -18,8 +18,8 @@ int main(int argc, char const *argv[]){
 	int sockfd;//socket file descriptor
     struct sockaddr_in clientAddress;
 	
-	char *msg_yes[]="yes";
-	char *msg_no[]="no";
+	const char msg_yes[]="yes";
+	const char msg_no[]="no";
 	
 	if(argc == 2) //check for correct arguments
 		port = atoi(argv[1]);
