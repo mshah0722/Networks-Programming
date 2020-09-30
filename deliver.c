@@ -18,7 +18,7 @@ int main(int argc, char const *argv[]){
     int sockfd; //Socket File Descriptor
 
     const char msg_yes[] = "yes";
-    const char msg_ftp[] = "ftp";
+    char msg_ftp[] = "ftp";
 
     struct addrinfo hints; //Used to provide hints concerning the type of socket that the caller supports or wishes to use
     struct addrinfo *res; //Pointer to a struct sockaddr containing the destination port and IP Address
@@ -71,13 +71,12 @@ int main(int argc, char const *argv[]){
 
     //Message variables
     char receivedMessage[MAXBUFLEN]; 
-    char *ftpResponse;
+    char *msg_ftp;
     
     int receivedBytes;
 
     //Sending ftp response
-    ftpResponse = msg_ftp;
-    sendto(sockfd, ftpResponse, strlen(ftpResponse), 0, res->ai_addr, res->ai_addrlen);
+    sendto(sockfd, msg_ftp, strlen(msg_ftp), 0, res->ai_addr, res->ai_addrlen);
 
     socklen_t  addrLen = sizeof(struct sockaddr_storage);
 
