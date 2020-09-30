@@ -9,76 +9,88 @@
 #include <ctype.h>
 #include <netdb.h> 
 
-#define MAXLEN 4096
+#define MAXBUFLEN 100
 
 int main(int argc, char const *argv[]){
+    
     int port;
+    int status;
+    int sockfd; //Socket File Descriptor
 
-    //Obtaining port number from argument
-    switch(argc) {
-        case 3:
-            port = atoi(argv[2]);
-            break;
-        default:
-            fprintf(stderr, "usage: deliver -<server address> -<server port number>\n");
-            exit(0);
-    }
+    struct addrinfo hints; //Used to provide hints concerning the type of socket that the caller supports or wishes to use
+    struct addrinfo *res; //Pointer to a struct sockaddr containing the destination port and IP Address
+    struct sockaddr_storage serverSockAddr; //Connector's addr info
+
+    //Check for correct arguments
+    if(argc == 3) 
+		port = atoi(argv[2]);
+	
+    //Print error message and return
+    else{
+		fprintf(stderr, "usage: deliver <server address> <server port number>\n");
+		return 0;
+	}
+
+    //Initialize character pointers to the arguments
     char* ipAddress = argv[1];
     char* portPointer = argv[2];
     
-    printf("Enter filename to transfer in the format: ftp <filename>\n");
+    //Recieve input from the user and store the input
+    fprintf("Enter file name to transfer in the format: ftp <file name>\n");
     char ftpInput[50], fileName[50];
     scanf("%s %s", ftpInput, fileName);
 
-    //Checking the input for ftp
+    //Verifying the input for ftp
     if(strcmp(ftpInput, "ftp")!= 0){
-        printf("Invalid Command: %s\n", ftpInput);
-        exit(0);
+        fprintf("Invalid Command: %s\n", ftpInput);
+        return 0;
     }
 
-    //Finding the file
+    //Checking if the input file actually exists
     if(access(fileName, F_OK) != 0){
         fprintf(stderr, "File not found\n");
-        exit(0);
+        return 0;
     }
-
-    int status, socketDescriptor;
-    struct addrinfo hints;
-    struct addrinfo *serverAddress;
-    struct sockaddr_storage serverSocketAddress;     //connector's addr info
-
 
     memset(&hints, 0, sizeof hints);
 
-    hints.ai_family = AF_UNSPEC;        //IPv4 or IPv6
-    hints.ai_socktype = SOCK_DGRAM;     //Connectionless data transfer of fixed max length datagrams
-    hints.ai_protocol = IPPROTO_UDP;    //UDP
+    hints.ai_family = AF_UNSPEC; //IPv4 or IPv6
+    hints.ai_socktype = SOCK_DGRAM; //Connectionless data transfer of fixed max length datagrams
+    hints.ai_protocol = IPPROTO_UDP; //UDP
 
-    status = getaddrinfo(ipAddress, portPointer, &hints, &serverAddress);
+    status = getaddrinfo(ipAddress, portPointer, &hints, &res);
 
     //Creating the UDP socket
-    if ((socketDescriptor = socket(serverAddress->ai_family,serverAddress->ai_socktype, serverAddress->ai_protocol)) == -1) {
+    if ((sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
         fprintf(stderr, "Error with socket\n");
-        exit(1);
+        return 1;
     }
 
-    //message variables
-    char messageReceived[MAXLEN], *ftpResponse;
-    int bytesRecveived;
+    //Message variables
+    char receivedMessage[MAXBUFLEN]; 
+    char *ftpResponse;
+    
+    int receivedBytes;
 
     //Sending ftp response
     ftpResponse = "ftp";
-    sendto(socketDescriptor, ftpResponse, strlen(ftpResponse), 0, serverAddress->ai_addr, serverAddress->ai_addrlen);
+    sendto(sockfd, ftpResponse, strlen(ftpResponse), 0, res->ai_addr, res->ai_addrlen);
 
-    socklen_t  addressLength = sizeof(struct sockaddr_storage);
-    bytesRecveived = recvfrom(socketDescriptor, messageReceived, MAXLEN-1 , 0, (struct sockaddr *)&serverSocketAddress, &addressLength);
-    messageReceived[bytesRecveived] = '\0';
+    socklen_t  addrLen = sizeof(struct sockaddr_storage);
 
+    receivedBytes = recvfrom(sockfd, receivedMessage, MAXBUFLEN-1 , 0, (struct sockaddr *)&serverSockAddr, &addrLen);
+    receivedMessage[receivedBytes] = '\0';
 
-    if (strcmp(messageReceived, "yes") == 0) {
-        printf("A file transfer can start.\n");
+    //Check whether the correct message is recieved
+    if (strcmp(receivedMessage, "yes") == 0) {
+        fprintf("A file transfer can start.\n");
     }
-    freeaddrinfo(serverAddress);
-    close(socketDescriptor);
+    
+    //Free the address info memory
+    freeaddrinfo(res);
+
+    //Close the socket file descriptor
+    close(sockfd);
+    
     return 0;
 }
