@@ -90,7 +90,7 @@ int main(int argc, char const *argv[]){
 	
     //Check whether the correct message is recieved
     if (strcmp(receivedMessage, msg_yes) == 0) {
-	    printf("%s\n",msg_yes);
+	    printf("%s\n", msg_yes);
         printf("A file transfer can start.\n");
     }
 
@@ -116,7 +116,7 @@ int main(int argc, char const *argv[]){
         if (strcmp(receivedMessage, "ACK") != 0)
             continue;
 
-        printf("Packet %d has been sent.\n", currentPacket->fragmentNumber);
+        printf("Packet %d has been sent.\n", currentPacket->frag_no);
         
         //Go to next packet in the the linked list and free the current packet
         currentPacket = currentPacket->nextPacket;
