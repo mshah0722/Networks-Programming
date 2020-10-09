@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+//Max Buffer Length
 #define MAXBUFLEN 100
 
 int main(int argc, char const *argv[]){
