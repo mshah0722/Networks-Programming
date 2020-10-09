@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <ctype.h>
 #include <netdb.h>
 #include <errno.h>
 #include <time.h>
