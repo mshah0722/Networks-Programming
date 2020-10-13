@@ -105,7 +105,7 @@ int main(int argc, char const *argv[]){
         char* final_string = struct_to_string(current_packet, &length);
         
         //Sending the packet
-        receivedBytes = sendto(sockfd, final_string, length, 0, serverSockAddr->ai_addr, serverSockAddr->ai_addrlen);
+        receivedBytes = sendto(sockfd, final_string, length, 0, res->ai_addr, res->ai_addrlen);
         
         //Receiving packets
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
