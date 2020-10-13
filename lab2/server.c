@@ -1,4 +1,4 @@
-#include "packet.h"
+#include "functions.h"
 
 #define MAXBUFLEN 1100
 
@@ -71,12 +71,12 @@ int main(int argc, char const *argv[]){
         buf[bytes_recv] = '\0';//add null character
         
         //extracting string and store into struct
-        struct packet* currentPacket = extractPacket(buf);
-        int total_frag = currentPacket->total_frag;
-        int frag_no = currentPacket->frag_no;
-        int size = currentPacket->size;
-        char* filename = currentPacket->filename;
-        char* filedata = currentPacket->filedata;
+        struct packet* current_packet = string_to_struct(buf);
+        int total_frag = current_packet->total_frag;
+        int frag_no = current_packet->frag_no;
+        int size = current_packet->size;
+        char* filename = current_packet->filename;
+        char* filedata = current_packet->filedata;
         //		printf("Received Packet %d\n", frag_no);
         //        printf("Total: %d\n", total_frag);
         //        printf("File: %s\n", filename);
@@ -99,7 +99,7 @@ int main(int argc, char const *argv[]){
         }
         
         //Freeing the current packet pointer
-        free(currentPacket);
+        free(current_packet);
         //printf("Freed Packet %d\n", frag_no);
         
     }
