@@ -34,20 +34,20 @@ int main(int argc, char const *argv[]){
     const char* portPointer = argv[2];
     
     //Recieve input from the user and store the input
-    printf("Enter file name to transfer in the format: ftp <file name>\n");
+    printf("Use the following format:(ftp <file name>) to transfer a file\n");
     char ftpInput[50], filename[50];
     scanf("%s %s", ftpInput, filename);
 
     //Verifying the input for ftp
     if(strcmp(ftpInput, msg_ftp)!= 0){
-        printf("no\n");
-        printf("Invalid Command: %s\n", ftpInput);
+        printf("%s\n", msg_no);
+        printf("Unknown Command: %s\n", ftpInput);
         return 0;
     }
     
     //Checking if the input file actually exists
     if(access(filename, F_OK) != 0){
-        fprintf(stderr, "File not found\n");
+        fprintf(stderr, "File does not exist\n");
         return 0;
     }
 
@@ -67,7 +67,6 @@ int main(int argc, char const *argv[]){
 
     //Message variables
     char receivedMessage[MAXBUFLEN]; 
-    //char *ftpResponse;
     
     int receivedBytes;
 
@@ -76,12 +75,13 @@ int main(int argc, char const *argv[]){
     startingTime = clock();
 
     //Sending ftp response
-    //ftpResponse = msg_ftp;
     sendto(sockfd, msg_ftp, strlen(msg_ftp), 0, res->ai_addr, res->ai_addrlen);
 
     socklen_t addrLen = sizeof(struct sockaddr_storage);
 
     receivedBytes = recvfrom(sockfd, receivedMessage, MAXBUFLEN-1 , 0, (struct sockaddr *)&serverSockAddr, &addrLen);
+    
+    //Adding null character to the end
     receivedMessage[receivedBytes] = '\0';
 
     //Getting the round trip time after receiving the response from the server
@@ -101,7 +101,10 @@ int main(int argc, char const *argv[]){
     struct packet* head_packet = create_linked_packets(filename);
     struct packet* current_packet = head_packet;
     
+    //Loop till end of file is reached
     while(current_packet != NULL) {
+        
+        //Converting packet from struct to string format
         char* final_string = struct_to_string(current_packet, &length);
         
         //Sending the packet
@@ -116,8 +119,9 @@ int main(int argc, char const *argv[]){
         //Checking to see if the packets have been acknowledged
         if (strcmp(receivedMessage, msg_ACK) != 0)
             continue;
-
-        printf("Packet %d has been sent.\n", current_packet->frag_no);
+        
+        //Checking if packets are sent
+        //printf("Packet %d has been sent.\n", current_packet->frag_no);
         
         //Go to next packet in the the linked list and free the current packet
         current_packet = current_packet->next;
