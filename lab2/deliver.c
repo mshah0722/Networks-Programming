@@ -86,7 +86,7 @@ int main(int argc, char const *argv[]){
 
     //Getting the round trip time after receiving the response from the server
     endingTime = clock();
-    float roundTripTime = ((float) (endingTime - startingTime)/CLOCKS_PER_SEC));
+    float roundTripTime = ((float) (endingTime - startingTime)/CLOCKS_PER_SEC);
     printf("Round-Trip Time: %f seconds\n", roundTripTime);
 	
     //Check whether the correct message is recieved
@@ -105,7 +105,7 @@ int main(int argc, char const *argv[]){
         char* final_string = struct_to_string(current_packet, &length);
         
         //Sending the packet
-        receivedBytes = sendto(sockfd, final_string, length, 0, serverAddress->ai_addr, serverAddress->ai_addrlen);
+        receivedBytes = sendto(sockfd, final_string, length, 0, serverSockAddr->ai_addr, serverSockAddr->ai_addrlen);
         
         //Receiving packets
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
