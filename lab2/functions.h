@@ -1,5 +1,5 @@
-#ifndef PACKET_H
-#define PACKET_H
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,39 +14,20 @@
 #include <time.h>
 
 
-#define FRAGMENTSIZE 1000
+#define MAXFRAGLEN 1000
 
 struct packet {
     unsigned int total_frag;        
     unsigned int frag_no;        
     unsigned int size;          
     char* filename;                  
-    char filedata[FRAGMENTSIZE];       
+    char filedata[MAXFRAGLEN];       
     struct packet * next;         
 };
 
-// //Prints all of the packet details (members of the packet struct)
-// void printPacket(struct packet * p){
-    // printf("Total Fragments: %d\n", p->total_frag);
-    // printf("Fragment Number: %d\n", p->frag_no);
-    // printf("Fragment Size: %d\n", p->size);
-    // printf("File Name: %s\n", p->filename);
-    // printf("File Data: %s\n", p->filedata);
-// }
-
-// //Prints all of the packets
-// void printAllPackets(struct packet * p){
-	// int i,total;
-	// total = p-> 
-    // while(p != NULL){
-        // printPacket(p);
-        // printf("\n");
-        // p = p->next;
-    // }
-// }
 
 //packet to string
-char * compressPacket(struct packet * pack, int * length){
+char * struct_to_string(struct packet * pack, int * length){
 	
     //Finding size of string
     int string1 = snprintf(NULL, 0, "%d", pack->total_frag);
@@ -74,12 +55,12 @@ char * compressPacket(struct packet * pack, int * length){
 
 
 //Create linked list of packets
-struct packet * fileConvert(char * file_name){
+struct packet * create_linked_packets(char * file_name){
     //Initializing vriables
     FILE * fp;
-    struct packet * head, * prev;
+    struct packet * head_packet, * prev;
     int num_bytes, total_fragments, frag_size, frag_num;
-    char data[FRAGMENTSIZE];
+    char data[MAXFRAGLEN];
     
     fp = fopen(file_name, "rb");//Open file in read-mode binary form
     
@@ -89,7 +70,7 @@ struct packet * fileConvert(char * file_name){
     fseek(fp, 0, SEEK_SET);//sets the cursor to beginning
     
     //Determining the total number of fragments
-    total_fragments = (num_bytes/FRAGMENTSIZE) + 1;
+    total_fragments = (num_bytes/MAXFRAGLEN) + 1;
     
     //Create linked list of packets 
     for (frag_num=1; frag_num <= total_fragments; frag_num++) {
@@ -98,13 +79,13 @@ struct packet * fileConvert(char * file_name){
         
 		
         if(frag_num==1){//set root
-            head = new_node;
+            head_packet = new_node;
         }
         else{//connect nodes
             prev->next = new_node;
         }
         
-        frag_size = fread(data, 1, FRAGMENTSIZE, fp);//reads file and gets size
+        frag_size = fread(data, 1, MAXFRAGLEN, fp);//reads file and gets size
         
         //set values
         new_node->total_frag = total_fragments;
@@ -121,12 +102,12 @@ struct packet * fileConvert(char * file_name){
     
     fclose(fp);//close file
     
-    return head;
+    return head_packet;
 }
 
 
 //Converting the packet to its individual elements from string format
-struct packet * extractPacket(char * packet_string){
+struct packet * string_to_struct(char * packet_string){
 
     struct packet * separated_packet;
     char *total_frag_string, *frag_no_string, *size_string, *file_name, *data;
@@ -160,29 +141,29 @@ struct packet * extractPacket(char * packet_string){
     memcpy(separated_packet->filedata, data, frag_size);
     
     
-    if(frag_size < FRAGMENTSIZE){
+    if(frag_size < MAXFRAGLEN){
         separated_packet->filedata[frag_size] = '\0';//adding null character
     }
     return separated_packet;
 }
 
 
-//delete linked list
-void freePackets(struct packet * head){
+// //delete linked list
+// void freePackets(struct packet * head_packet){
     
-    struct packet * curr = head;
-    struct packet * next;
+    // struct packet * curr = head_packet;
+    // struct packet * next;
     
-    //looop till end
-    while(curr != NULL) {
+    // //looop till end
+    // while(curr != NULL) {
        
-        next = curr->next;
+        // next = curr->next;
         
-        free(curr);//delete
+        // free(curr);//delete
         
-        curr = next;//set next
-    }
-}
+        // curr = next;//set next
+    // }
+// }
 
 
 #endif
