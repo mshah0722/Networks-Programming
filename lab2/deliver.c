@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]){
     int receivedBytes;
 
     //Section 2: Measure the round-trip time from the client to the server.
-    clock_t startingTime, endingTime
+    clock_t startingTime, endingTime;
     startingTime = clock();
 
     //Sending ftp response
@@ -85,7 +85,7 @@ int main(int argc, char const *argv[]){
     receivedMessage[receivedBytes] = '\0';
 
     //Getting the round trip time after receiving the response from the server
-    endingTime = clock()
+    endingTime = clock();
     float roundTripTime = ((float) (endingTime - startingTime)/CLOCKS_PER_SEC));
     printf("Round-Trip Time: %f seconds\n", roundTripTime);
 	
