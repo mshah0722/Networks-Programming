@@ -120,7 +120,7 @@ int main(int argc, char const *argv[]){
         if (strcmp(receivedMessage, msg_ACK) != 0)
             continue;
         
-        //Checking if packets are sent
+        //Checking if all packets are sent
         //printf("Packet %d has been sent.\n", current_packet->frag_no);
         
         //Go to next packet in the the linked list and free the current packet
