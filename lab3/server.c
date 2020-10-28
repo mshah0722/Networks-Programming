@@ -62,8 +62,11 @@ int main(int argc, char const *argv[]){
         }
     }
 
+    //File pointer
     FILE* fp;
+
     int loop = 1;
+    
     while(loop == 1) {
 		
         //receive packets in string format
