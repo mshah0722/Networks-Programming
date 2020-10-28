@@ -82,14 +82,7 @@ int main(int argc, char const *argv[]){
         int frag_no = current_packet->frag_no;
         int size = current_packet->size;
         char* filename = current_packet->filename;
-        char* filedata = current_packet->filedata;
-
-        //error checking
-        //		printf("Received Packet %d\n", frag_no);
-        //        printf("Total: %d\n", total_frag);
-        //        printf("File: %s\n", filename);
-        //        printf("Data: %s\n", filedata);
-        
+        char* filedata = current_packet->filedata;        
 		
         if (frag_no == total_frag) loop = 0;//check loop condition
 		

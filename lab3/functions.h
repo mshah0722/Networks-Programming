@@ -147,23 +147,4 @@ struct packet * string_to_struct(char * packet_string){
     return separated_packet;
 }
 
-
-// //delete linked list
-// void freePackets(struct packet * head_packet){
-    
-    // struct packet * curr = head_packet;
-    // struct packet * next;
-    
-    // //looop till end
-    // while(curr != NULL) {
-       
-        // next = curr->next;
-        
-        // free(curr);//delete
-        
-        // curr = next;//set next
-    // }
-// }
-
-
 #endif
