@@ -110,7 +110,7 @@ int main(int argc, char const *argv[]){
         //Sending the packet
         receivedBytes = sendto(sockfd, final_string, length, 0, res->ai_addr, res->ai_addrlen);
         
-        //Receiving packets
+        //Receiving ACK response from server 
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
         
         //Adding \0 for string comparison
@@ -120,7 +120,7 @@ int main(int argc, char const *argv[]){
         if (strcmp(receivedMessage, msg_ACK) != 0)
             continue;
         
-        //Checking if all packets are sent
+        //Checking if packets are sent
         //printf("Packet %d has been sent.\n", current_packet->frag_no);
         
         //Go to next packet in the the linked list and free the current packet
