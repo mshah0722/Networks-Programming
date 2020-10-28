@@ -96,8 +96,8 @@ int main(int argc, char const *argv[]){
     }
 
     //Calculating values for timeout functionality
-    const float alpha = 0.125;
-    const float beta = 0.25;
+    const double alpha = 0.125;
+    const double beta = 0.25;
 
     struct timeval timeout;
     
@@ -113,7 +113,7 @@ int main(int argc, char const *argv[]){
     FD_ZERO(&readfd);
 
     //Tranfering the file as packets
-    int length = 0;
+    int length;
     int timeoutCount = 1;
 
     struct packet* head_packet = create_linked_packets(filename);
@@ -142,7 +142,7 @@ int main(int argc, char const *argv[]){
             printf("Error: Timeout Occurred\n");
             
             flagRetransmission = true;
-            timeoutInterval = timeoutInterval*2;
+            timeoutInterval *= 2;
             
             free(final_string);
             
