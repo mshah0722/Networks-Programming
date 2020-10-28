@@ -70,7 +70,7 @@ int main(int argc, char const *argv[]){
     
     int receivedBytes;
 
-    //Section 2: Measure the round-trip time from the client to the server.
+    //Measure the round-trip time from the client to the server.
     clock_t startingTime, endingTime;
     startingTime = clock();
 
@@ -96,22 +96,25 @@ int main(int argc, char const *argv[]){
     }
 
     //Calculating values for timeout functionality
-    struct timeval timeout;
-    double sampleRTT, devRTT, timeoutInterval;
     const float alpha = 0.125;
     const float beta = 0.25;
-    bool reTransmissionCheck = false;
+
+    struct timeval timeout;
+    
+    double sampleRTT, devRTT, timeoutInterval;
+    bool flagRetransmission = false;
 
     sampleRTT = roundTripTime;
     devRTT = roundTripTime/2;
     timeoutInterval = sampleRTT + 4*devRTT;
 
     //The File Descriptor is set to recieve packets
-    fd_set readFileDescriptor;
-    FD_ZERO(&readFileDescriptor)
+    fd_set readfd;
+    FD_ZERO(&readfd);
 
     //Tranfering the file as packets
-    int length = 0, timeoutCount = 1;
+    int length = 0;
+    int timeoutCount = 1;
 
     struct packet* head_packet = create_linked_packets(filename);
     struct packet* current_packet = head_packet;
@@ -126,6 +129,31 @@ int main(int argc, char const *argv[]){
         startingTime = clock();
         receivedBytes = sendto(sockfd, final_string, length, 0, res->ai_addr, res->ai_addrlen);
         
+         //Monitoring the socket descriptor and setting the timeout
+        timeout.tv_sec = timeoutInterval/1;
+        timeout.tv_usec = (timeoutInterval - timeout.tv_sec)*1000000;
+        
+        FD_SET(sockfd, &readfd);
+        select(sockfd+1, &readfd, NULL, NULL, &timeout);
+        
+        //There is a timeout, so need to retransmit the packet
+        if(!FD_ISSET(sockfd, &readfd)) {
+            printf("Error: Timeout Occurred\n");
+            flagRetransmission = true;
+            timeoutInterval = timeoutInterval*2;
+            free(final_string);
+            timeoutCount++;
+            //Breaking out if there are 10 timeouts in a row
+            if (timeoutCount > 10) {
+                printf("Timed out too many times. Ending the process.\n");
+                return 0;
+            }
+            continue;
+        }
+        else {
+            timeoutCount = 0;
+        }
+
         //Receiving ACK response from server 
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
         endingTime = clock();
@@ -133,13 +161,28 @@ int main(int argc, char const *argv[]){
         //Adding \0 for string comparison
         receivedMessage[receivedBytes] = '\0';
         
-        //Checking to see if the packets have been acknowledged
+        //Checking if the packets have been acknowledged
+        //Else retransmitting the packet
         if (strcmp(receivedMessage, msg_ACK) != 0)
+            free(final_string);
+            flagRetransmission = true;
             continue;
         
         //Checking if packets are sent
-        //printf("Packet %d has been sent.\n", current_packet->frag_no);
+        //printf("Packet %d has been sent and acknowledged.\n", current_packet->frag_no);
         
+        //Calculate new timeout values if did not need to retransmit
+        if (flagRetransmission){
+            flagRetransmission = false;
+        }
+
+        else {
+            roundTripTime = ((double) (endingTime - startingTime)/CLOCKS_PER_SEC);
+            sampleRTT = (1-alpha) * sampleRTT + alpha * roundTripTime;
+            devRTT = (1-beta) * devRTT + beta * fabs(sampleRTT - roundTripTime);
+            timeoutInterval = sampleRTT + 4 * devRTT;
+        }
+
         //Go to next packet in the the linked list and free the current packet
         current_packet = current_packet->next;
         free(final_string);
