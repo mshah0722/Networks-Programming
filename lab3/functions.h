@@ -12,6 +12,8 @@
 #include <netdb.h>
 #include <errno.h>
 #include <time.h>
+#include <stdbool.h>
+#include <math.h>
 
 
 #define MAXFRAGLEN 1000

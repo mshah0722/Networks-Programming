@@ -73,11 +73,7 @@ int main(int argc, char const *argv[]){
         int bytes_recv = recvfrom(sockfd, buf, MAXBUFLEN, 0, (struct sockaddr*) &client_addr, &msg_len);
         buf[bytes_recv] = '\0';//add null character
         
-        //Send ACK
-        if (sendto(sockfd, msg_ACK, strlen(msg_ACK), 0, (struct sockaddr*) &client_addr, msg_len) == -1) {
-            fprintf(stderr, "Acknowledgement message not sent to client\n");
-            exit(1);
-        }
+
 
         //extracting string and store into struct format
         struct packet* current_packet = string_to_struct(buf);
@@ -95,7 +91,12 @@ int main(int argc, char const *argv[]){
         }
         fwrite(filedata, 1, size, fp);//write to file
         
-        
+        //Send ACK
+        if (sendto(sockfd, msg_ACK, strlen(msg_ACK), 0, (struct sockaddr*) &client_addr, msg_len) == -1) {
+            fprintf(stderr, "Acknowledgement message not sent to client\n");
+            exit(1);
+        }        
+
         //Freeing the current packet pointer
         free(current_packet);
         
