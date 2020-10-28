@@ -129,25 +129,32 @@ int main(int argc, char const *argv[]){
         startingTime = clock();
         receivedBytes = sendto(sockfd, final_string, length, 0, res->ai_addr, res->ai_addrlen);
         
-         //Monitoring the socket descriptor and setting the timeout
+        //Monitoring the socket descriptor and setting the timeout
         timeout.tv_sec = timeoutInterval/1;
         timeout.tv_usec = (timeoutInterval - timeout.tv_sec)*1000000;
         
         FD_SET(sockfd, &readfd);
         select(sockfd+1, &readfd, NULL, NULL, &timeout);
         
-        //There is a timeout, so need to retransmit the packet
+        //Clock timed out  
+        //Need to retransmit the packet
         if(!FD_ISSET(sockfd, &readfd)) {
             printf("Error: Timeout Occurred\n");
+            
             flagRetransmission = true;
             timeoutInterval = timeoutInterval*2;
+            
             free(final_string);
+            
             timeoutCount++;
-            //Breaking out if there are 10 timeouts in a row
+            
+            //10 consecutive timeouts
+            //Breaking out
             if (timeoutCount > 10) {
                 printf("Timed out too many times. Ending the process.\n");
                 return 0;
             }
+            
             continue;
         }
         else {
@@ -158,20 +165,22 @@ int main(int argc, char const *argv[]){
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
         endingTime = clock();
 
-        //Adding \0 for string comparison
+        //Adding \0 to terminate string for string comparison
         receivedMessage[receivedBytes] = '\0';
         
         //Checking if the packets have been acknowledged
         //Else retransmitting the packet
-        if (strcmp(receivedMessage, msg_ACK) != 0)
+        if (strcmp(receivedMessage, msg_ACK) != 0){
             free(final_string);
+            
             flagRetransmission = true;
+            
             continue;
-        
+        }
         //Checking if packets are sent
         //printf("Packet %d has been sent and acknowledged.\n", current_packet->frag_no);
         
-        //Calculate new timeout values if did not need to retransmit
+        //Calculate new timeout values if the packet did not need to retransmit
         if (flagRetransmission){
             flagRetransmission = false;
         }
@@ -183,8 +192,10 @@ int main(int argc, char const *argv[]){
             timeoutInterval = sampleRTT + 4 * devRTT;
         }
 
-        //Go to next packet in the the linked list and free the current packet
+        //Go to next packet in the the linked list
         current_packet = current_packet->next;
+
+        //Free the current compressed string
         free(final_string);
     }
     
