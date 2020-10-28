@@ -95,8 +95,23 @@ int main(int argc, char const *argv[]){
         printf("A file transfer can start.\n");
     }
 
+    //Calculating values for timeout functionality
+    struct timeval timeout;
+    double sampleRTT, devRTT, timeoutInterval;
+    const float alpha = 0.125;
+    const float beta = 0.25;
+    bool reTransmissionCheck = false;
+
+    sampleRTT = roundTripTime;
+    devRTT = roundTripTime/2;
+    timeoutInterval = sampleRTT + 4*devRTT;
+
+    //The File Descriptor is set to recieve packets
+    fd_set readFileDescriptor;
+    FD_ZERO(&readFileDescriptor)
+
     //Tranfering the file as packets
-    int length;
+    int length = 0, timeoutCount = 1;
 
     struct packet* head_packet = create_linked_packets(filename);
     struct packet* current_packet = head_packet;
@@ -108,11 +123,13 @@ int main(int argc, char const *argv[]){
         char* final_string = struct_to_string(current_packet, &length);
         
         //Sending the packet
+        startingTime = clock();
         receivedBytes = sendto(sockfd, final_string, length, 0, res->ai_addr, res->ai_addrlen);
         
         //Receiving ACK response from server 
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
-        
+        endingTime = clock();
+
         //Adding \0 for string comparison
         receivedMessage[receivedBytes] = '\0';
         

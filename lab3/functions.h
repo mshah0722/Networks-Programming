@@ -26,7 +26,7 @@ struct packet {
 };
 
 
-//packet to string
+//Packet to string
 char * struct_to_string(struct packet * pack, int * length){
 	
     //Finding size of string
@@ -37,18 +37,18 @@ char * struct_to_string(struct packet * pack, int * length){
     int string5 = pack->size;
     int total_size = string1 + string2 + string3 + string4 + string5;
     
+    //Create space for the string
+    char * compressedPacket = malloc((total_size+4)*sizeof(char));
     
-    char * compressedPacket = malloc((total_size+4)*sizeof(char));//create space for the string
-    
-
+    //Store in string
     int index_offset = sprintf(compressedPacket, "%d:%d:%d:%s:",
-                                pack->total_frag, pack->frag_no, pack->size, pack->filename);//store in string
+                                pack->total_frag, pack->frag_no, pack->size, pack->filename);
     
-     
-    memcpy(&compressedPacket[index_offset], pack->filedata, pack->size);//Add the file data
+    //Add the file data
+    memcpy(&compressedPacket[index_offset], pack->filedata, pack->size);
     
-    
-    *length = index_offset + pack->size;//total length of the packet
+    //Total length of the packet
+    *length = index_offset + pack->size;
     
     return compressedPacket;
 }
@@ -65,9 +65,9 @@ struct packet * create_linked_packets(char * file_name){
     fp = fopen(file_name, "rb");//Open file in read-mode binary form
     
 
-    fseek(fp, 0, SEEK_END);//sets cursor to end 
-    num_bytes = ftell(fp);//gets the size of the file
-    fseek(fp, 0, SEEK_SET);//sets the cursor to beginning
+    fseek(fp, 0, SEEK_END);//Sets cursor to end 
+    num_bytes = ftell(fp);//Gets the size of the file
+    fseek(fp, 0, SEEK_SET);//Sets the cursor to beginning
     
     //Determining the total number of fragments
     total_fragments = (num_bytes/MAXFRAGLEN) + 1;
@@ -77,15 +77,18 @@ struct packet * create_linked_packets(char * file_name){
        
         struct packet * new_node = malloc(sizeof(struct packet));
         
-		
-        if(frag_num==1){//set root
+		//Set root
+        if(frag_num==1){
             head_packet = new_node;
         }
-        else{//connect nodes
+
+        //Connect nodes
+        else{
             prev->next = new_node;
         }
         
-        frag_size = fread(data, 1, MAXFRAGLEN, fp);//reads file and gets size
+        //Reads file and gets size
+        frag_size = fread(data, 1, MAXFRAGLEN, fp);
         
         //set values
         new_node->total_frag = total_fragments;
@@ -93,14 +96,18 @@ struct packet * create_linked_packets(char * file_name){
         new_node->size = frag_size;
         new_node->filename = file_name;
         
-        memcpy(new_node->filedata, data, frag_size);//copying data
+        //Copying data
+        memcpy(new_node->filedata, data, frag_size);
 
-        new_node->next = NULL;//add null
+        //Add null
+        new_node->next = NULL;
         
-        prev = new_node;//changing prev
+        //Changing prev
+        prev = new_node;
     }
     
-    fclose(fp);//close file
+    //Close file
+    fclose(fp);
     
     return head_packet;
 }
@@ -113,7 +120,7 @@ struct packet * string_to_struct(char * packet_string){
     char *total_frag_string, *frag_no_string, *size_string, *file_name, *data;
     int total_fragments, frag_num, frag_size;
     
-    //splitting the string
+    //Splitting the string
     total_frag_string = strtok(packet_string, ":");
     frag_no_string = strtok(NULL, ":");
     size_string = strtok(NULL, ":");
@@ -124,15 +131,15 @@ struct packet * string_to_struct(char * packet_string){
     frag_num = atoi(frag_no_string);
     frag_size = atoi(size_string);
     
-    //index for data
+    //Index for data
     int index = strlen(total_frag_string) + strlen(frag_no_string) +
     strlen(size_string) + strlen(file_name) + 4;
     
-    //copy data
+    //Copy data
     data = malloc(frag_size*sizeof(char));
     memcpy(data, &packet_string[index], frag_size);
     
-    //asign values
+    //Assign values
     separated_packet = malloc(sizeof(struct packet));
     separated_packet->total_frag = total_fragments;
     separated_packet->frag_no = frag_num;
@@ -142,7 +149,8 @@ struct packet * string_to_struct(char * packet_string){
     
     
     if(frag_size < MAXFRAGLEN){
-        separated_packet->filedata[frag_size] = '\0';//adding null character
+        //Adding null character
+        separated_packet->filedata[frag_size] = '\0';
     }
     return separated_packet;
 }
