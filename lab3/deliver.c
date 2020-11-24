@@ -187,8 +187,8 @@ int main(int argc, char const *argv[]){
 
         else {
             roundTripTime = ((double) (endingTime - startingTime)/CLOCKS_PER_SEC);
-            sampleRTT = (1-alpha) * sampleRTT + alpha * roundTripTime;
-            devRTT = (1-beta) * devRTT + beta * fabs(sampleRTT - roundTripTime);
+            sampleRTT = (1 - alpha) * sampleRTT + alpha * roundTripTime;
+            devRTT = (1 - beta) * devRTT + beta * fabs(sampleRTT - roundTripTime);
             timeoutInterval = sampleRTT + 4 * devRTT;
         }
 
