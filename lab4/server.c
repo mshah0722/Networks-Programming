@@ -2,7 +2,7 @@
 
 #define NUM_CLIENT 5
 
-// list of client access
+// List of client access
 ID_Pass client_list[NUM_CLIENT];
 
 void Print_Login_Status() {
@@ -75,7 +75,7 @@ int main (int argc, char *argv[]){
         }
     }
 
-    // setting the credentials for each client
+    // Setting the credentials for each client
     for (int i = 0; i < NUM_CLIENT; i++) {
         strcpy(client_list[i].id, "guestX");
         client_list[i].id[5] = i + '0';
@@ -238,7 +238,7 @@ int main (int argc, char *argv[]){
                 char size_string[5];
                 sprintf(type_string, "%d", server_message.type);
                 sprintf(size_string, "%d", server_message.size);
-                char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
                 printf("User %d logged in. ", index);
                 Print_Login_Status();
                 write(ready_fd, serv_message, 1000);
@@ -254,7 +254,7 @@ int main (int argc, char *argv[]){
                 char size_string[5];
                 sprintf(type_string, "%d", server_message.type);
                 sprintf(size_string, "%d", server_message.size);
-                char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
                 write(ready_fd, serv_message, 1000);
                 free(serv_message);
                 close(ready_fd);
@@ -269,7 +269,7 @@ int main (int argc, char *argv[]){
                 char size_string[5];
                 sprintf(type_string, "%d", server_message.type);
                 sprintf(size_string, "%d", server_message.size);
-                char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
                 write(ready_fd, serv_message, 1000);
                 free(serv_message);
                 close(ready_fd);
@@ -298,7 +298,7 @@ int main (int argc, char *argv[]){
             char size_string[5];
             sprintf(type_string, "%d", server_message.type);
             sprintf(size_string, "%d", server_message.size);
-            char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
@@ -341,7 +341,7 @@ int main (int argc, char *argv[]){
             char size_string[5];
             sprintf(type_string, "%d", server_message.type);
             sprintf(size_string, "%d", server_message.size);
-            char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
@@ -399,7 +399,7 @@ int main (int argc, char *argv[]){
             char size_string[5];
             sprintf(type_string, "%d", server_message.type);
             sprintf(size_string, "%d", server_message.size);
-            char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
@@ -419,7 +419,7 @@ int main (int argc, char *argv[]){
             sprintf(type_string, "%d", server_message.type);
             sprintf(size_string, "%d", server_message.size);
 
-            char *serv_message = Concat(type_string, size_string, server_message.source, server_message.data);
+            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (client_list[i].session_id == session_index){

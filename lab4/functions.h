@@ -54,7 +54,7 @@ typedef struct id_pass {
     int session_id;
 }ID_Pass;
 
-char* Concat (char *string1, char *string2, char *string3, char *string4) {
+char* struct_to_string (char *string1, char *string2, char *string3, char *string4) {
 
 	int string_length = strlen(string1) + strlen(string2) + strlen(string3) + strlen(string4) + 4;
 	char* string = (char *)malloc(2000 * sizeof(char));
@@ -94,3 +94,5 @@ char* Concat (char *string1, char *string2, char *string3, char *string4) {
 
 	return string;
 }
+
+#endif
