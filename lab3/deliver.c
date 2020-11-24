@@ -105,7 +105,7 @@ int main(int argc, char const *argv[]){
     bool flagRetransmission = false;
 
     sampleRTT = roundTripTime;
-    devRTT = roundTripTime/2;
+    devRTT = roundTripTime;
     timeoutInterval = sampleRTT + 4*devRTT;
 
     //The File Descriptor is set to recieve packets
@@ -114,9 +114,9 @@ int main(int argc, char const *argv[]){
 
     //Tranfering the file as packets
     int length;
-    int timeoutCount = 1;
 
     struct packet* head_packet = create_linked_packets(filename);
+    printf("total pacets: %d \n",head_packet->total_frag);
     struct packet* current_packet = head_packet;
     
     //Loop till end of file is reached
@@ -132,7 +132,7 @@ int main(int argc, char const *argv[]){
         //Monitoring the socket descriptor and setting the timeout
         timeout.tv_sec = timeoutInterval/1;
         timeout.tv_usec = (timeoutInterval - timeout.tv_sec)*1000000;
-        
+
         FD_SET(sockfd, &readfd);
         select(sockfd+1, &readfd, NULL, NULL, &timeout);
         
@@ -146,20 +146,9 @@ int main(int argc, char const *argv[]){
             
             free(final_string);
             
-            timeoutCount++;
-            
-            //10 consecutive timeouts
-            //Breaking out
-            if (timeoutCount > 10) {
-                printf("Timed out too many times. Ending the process.\n");
-                return 0;
-            }
-            
             continue;
         }
-        else {
-            timeoutCount = 0;
-        }
+
 
         //Receiving ACK response from server 
         receivedBytes = recvfrom(sockfd, receivedMessage, MAXFRAGLEN - 1, 0, (struct sockaddr *)&serverSockAddr, &addrLen);
@@ -178,7 +167,7 @@ int main(int argc, char const *argv[]){
             continue;
         }
         //Checking if packets are sent
-        //printf("Packet %d has been sent and acknowledged.\n", current_packet->frag_no);
+        printf("Packet %d has been sent and acknowledged.\n", current_packet->frag_no);
         
         //Calculate new timeout values if the packet did not need to retransmit
         if (flagRetransmission){
