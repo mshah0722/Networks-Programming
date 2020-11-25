@@ -33,7 +33,7 @@ int main (int argc, char *argv[]){
         printf("Client No.%d: %s, password: %s\n", i + 1, listOfClients[i].id, listOfClients[i].password);
     }
 
-    displayLoginStatus();
+    //displayLoginStatus();
 
     //Initialize all the sessions as Null
     char *listOfSessions[NUM_CLIENT];
@@ -127,7 +127,7 @@ int main (int argc, char *argv[]){
             
         read(readyfd, buffer, 1000);
         
-        printf("Message received from client ---> %s\n", buffer);
+        //printf("Message received from client ---> %s\n", buffer);
 
         char *inputPtr;
         inputPtr = strtok(buffer, ":");

@@ -105,9 +105,9 @@ void displayLoginStatus() {
     printf("User status:");
 
     for (int i = 0; i < NUM_CLIENT; i++) {
-        printf(" %d->", i);
-        if (listOfClients[i].loggedIn) printf("on");
-        else printf("off");
+        printf(" %d:", i);
+        if (listOfClients[i].loggedIn) printf("Online");
+        else printf("Offline");
     }
 
     printf("\n");
