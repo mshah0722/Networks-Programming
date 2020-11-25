@@ -67,7 +67,7 @@ int main (int argc, char *argv[]){
 
     //Assigning a name binding to the socket 
     if (bindfd == -1) {
-        fprintf(stderr, "Bind error\n");
+        fprintf(stderr, "bind error\n");
         exit(0);
     }
 
@@ -76,7 +76,7 @@ int main (int argc, char *argv[]){
     int listenfd = listen(sockfd, 10);
 
     if (listenfd != 0) {
-        fprintf(stderr, "Listen error");
+        fprintf(stderr, "listen error");
         exit(0);
     }
 
@@ -120,7 +120,7 @@ int main (int argc, char *argv[]){
         if (readyfd == sockfd) {
             readyfd = accept(sockfd, (struct sockaddr*)client_addr, &server_size);
             if (readyfd < 0) {
-                fprintf(stderr, "Server accept error");
+                fprintf(stderr, "server accept error");
                 exit(0);
             }
         }
@@ -314,7 +314,7 @@ int main (int argc, char *argv[]){
                 strcpy(serverMsg.data, "Session does not exist.");
             }
 
-            //Display the message to the user
+            //Send the message to the user
             char stringType[5];
             char stringSize[5];
 
@@ -330,25 +330,24 @@ int main (int argc, char *argv[]){
         //If the user wants to leave the session
         else if (clientMsg.type == LEAVE_SESS){
             int clientIdx = atoi(clientMsg.source);
-            int numOfClients = -1;
+
+            int NumClients=0;
 
             //Display this message to the user
             printf("User %d left session %s. ", clientIdx, listOfSessions[listOfClients[clientIdx].sessionId]);
-
-            for (int i = 0; i < NUM_CLIENT; i++){
-                if (listOfSessions[i] != NULL) {
-                    if (strcmp(listOfSessions[i], clientMsg.data) == 0){
-                        listOfClients[clientIdx].sessionId -= 1;
-                        if(listOfClients[clientIdx].sessionId == -1){
-                            listOfSessions[i] = NULL;
-                        }
-                        break;
-                    }
+            
+            
+            for (int i = 0; i < NUM_CLIENT; i++){//find how many clients are in the session that we want to leave
+                if(listOfClients[i].sessionId == listOfClients[clientIdx].sessionId){
+                    NumClients++;
                 }
             }
 
+            if(NumClients == 1 ){//thers only 1 client in the session            
+                listOfSessions[listOfClients[clientIdx].sessionId] = NULL;
+               }
+            
             listOfClients[clientIdx].sessionId = -1;
-
             displayUserSession(listOfSessions);
         }
         
@@ -380,7 +379,7 @@ int main (int argc, char *argv[]){
                     char temp[100];
                     char sess_name[20];
 
-                    sprintf(temp, "%d->", i);
+                    sprintf(temp, "%d:", i);
                     
                     //Also list whether each user is in a session or not
                     if (sessionIdx == -1) {
@@ -398,7 +397,7 @@ int main (int argc, char *argv[]){
 
             serverMsg.size = strlen(serverMsg.data);
 
-            //Display this message to the screen
+            //Send this message to the client
             char stringType[5];
             char stringSize[5];
 

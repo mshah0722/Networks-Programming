@@ -120,7 +120,7 @@ void displayUserSession (char **listOfSessions) {
     for (int i = 0; i < NUM_CLIENT; i++){
         if (listOfClients[i].loggedIn != 0){
             int session_idx = listOfClients[i].sessionId;
-            printf(" %d->", i);
+            printf(" %d:", i);
             
             if (session_idx == -1) {
                 printf("Not in a session");
@@ -141,7 +141,7 @@ void displaySessionStatus (char **listOfSessions) {
 
     for (int i = 0; i < NUM_CLIENT; i++){
         if (listOfSessions[i] != NULL){
-            printf(" %d->%s", i, listOfSessions[i]);
+            printf(" %d:%s", i, listOfSessions[i]);
         }
     }
 
