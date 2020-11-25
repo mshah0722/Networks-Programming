@@ -25,9 +25,9 @@ int main (int argc, char *argv[]){
         char password[4];
         sprintf(password, "%d%d%d%d", i, i, i, i);
         strcpy(listOfClients[i].password, password);
-        listOfClients[i].logged_in = 0;
+        listOfClients[i].loggedIn = false;
         listOfClients[i].acceptfd = 0;
-        listOfClients[i].session_id = -1;
+        listOfClients[i].sessionId = -1;
 
         //Print client usernames and passwords on the screen
         printf("Client No.%d: %s, password: %s\n", i + 1, listOfClients[i].id, listOfClients[i].password);
@@ -92,7 +92,7 @@ int main (int argc, char *argv[]){
         for (int i = 0; i < NUM_CLIENT; i++){
             if (maxfd < listOfClients[i].acceptfd) maxfd = listOfClients[i].acceptfd;
 
-            if (listOfClients[i].logged_in != 0)
+            if (listOfClients[i].loggedIn)
                 FD_SET(listOfClients[i].acceptfd, &listen_set);
         }
 
@@ -101,7 +101,7 @@ int main (int argc, char *argv[]){
         //
         int readyfd = sockfd;
         for (int i = 0; i < NUM_CLIENT; i++){
-            if (listOfClients[i].logged_in == 1) {
+            if (listOfClients[i].loggedIn) {
                 if (FD_ISSET(listOfClients[i].acceptfd, &listen_set)) {
                     readyfd = listOfClients[i].acceptfd;
                     break;
@@ -166,13 +166,13 @@ int main (int argc, char *argv[]){
             for (idx = 0; idx < NUM_CLIENT; idx++) {
                 if ((strcmp(listOfClients[idx].id, clientMsg.source) == 0) && (strcmp(listOfClients[idx].password, clientMsg.data) == 0)) {
                     
-                    if (listOfClients[idx].logged_in) {
+                    if (listOfClients[idx].loggedIn) {
                         flag = -1;
                     }
 
                     else {
                         flag = 1;
-                        listOfClients[idx].logged_in = 1;
+                        listOfClients[idx].loggedIn = true;
                         listOfClients[idx].acceptfd = readyfd;
                     }
 
@@ -261,7 +261,7 @@ int main (int argc, char *argv[]){
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] != NULL) {
                     if (strcmp(listOfSessions[i], clientMsg.data) == 0){
-                        listOfClients[client_idx].session_id = i;
+                        listOfClients[client_idx].sessionId = i;
                         success = 1;
                         break;
                     }
@@ -269,7 +269,7 @@ int main (int argc, char *argv[]){
             }
 
             if (success) {
-                printf("User %d joined %s. ", client_idx, listOfSessions[listOfClients[client_idx].session_id]);
+                printf("User %d joined %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
                 displayUserSession(listOfSessions);
 
                 serverMsg.type = JN_ACK;
@@ -300,8 +300,8 @@ int main (int argc, char *argv[]){
         else if (clientMsg.type == LEAVE_SESS){
             int client_idx = atoi(clientMsg.source);
 
-            printf("User %d left session %s. ", client_idx, listOfSessions[listOfClients[client_idx].session_id]);
-            listOfClients[client_idx].session_id = -1;
+            printf("User %d left session %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
+            listOfClients[client_idx].sessionId = -1;
             displayUserSession(listOfSessions);
 
         }
@@ -325,18 +325,18 @@ int main (int argc, char *argv[]){
             strcat(serverMsg.data, "\n\t");
 
             for (int i = 0; i < NUM_CLIENT; i++){
-                if (listOfClients[i].logged_in != 0){
-                    int session_idx = listOfClients[i].session_id;
+                if (listOfClients[i].loggedIn){
+                    int sessionIdx = listOfClients[i].sessionId;
                     char temp[100];
                     char sess_name[20];
                     sprintf(temp, "%d->", i);
                     
-                    if (session_idx == -1) {
+                    if (sessionIdx == -1) {
                         strcpy(sess_name, "N/A ");
                     }
 
                     else {
-                        sprintf(sess_name, "%s ", listOfSessions[session_idx]);
+                        sprintf(sess_name, "%s ", listOfSessions[sessionIdx]);
                     }
 
                     strcat(temp, sess_name);
@@ -357,7 +357,7 @@ int main (int argc, char *argv[]){
 
         else if (clientMsg.type == MESSAGE){
             int client_idx = atoi(clientMsg.source);
-            int session_idx = listOfClients[client_idx].session_id;
+            int sessionIdx = listOfClients[client_idx].sessionId;
 
             serverMsg.type = MESSAGE;
             strcpy(serverMsg.source, clientMsg.source);
@@ -374,7 +374,7 @@ int main (int argc, char *argv[]){
 
             //
             for (int i = 0; i < NUM_CLIENT; i++){
-                if (listOfClients[i].session_id == session_idx){
+                if (listOfClients[i].sessionId == sessionIdx){
                     write(listOfClients[i].acceptfd, serv_message, 1000);
                 }
             }
@@ -386,14 +386,14 @@ int main (int argc, char *argv[]){
         else if (clientMsg.type == EXIT){
             int client_idx = atoi(clientMsg.source);
 
-            listOfClients[client_idx].logged_in = 0;
+            listOfClients[client_idx].loggedIn = false;
             printf("User %d quitted. ", client_idx);
             displayLoginStatus();
 
             close(listOfClients[client_idx].acceptfd);
-            listOfClients[client_idx].logged_in = 0;
+            listOfClients[client_idx].loggedIn = false;
             listOfClients[client_idx].acceptfd = 0;
-            listOfClients[client_idx].session_id = -1;
+            listOfClients[client_idx].sessionId = -1;
         }
     }
 

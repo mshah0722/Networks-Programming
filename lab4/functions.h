@@ -6,6 +6,7 @@
 #include <libgen.h> 
 #include <string.h>
 #include <time.h> 
+#include <bool.h>
 #include <sys/types.h> 
 #include <sys/socket.h> 
 #include <sys/stat.h>
@@ -50,9 +51,9 @@ typedef enum message_type {
 typedef struct user_info {
     char id[100];
     char password[1000];
-    int logged_in;
-    int accept_fd;
-    int session_id;
+    bool loggedIn;
+    int acceptfd;
+    int sessionId;
 }USER_INFO;
 
 char* struct_to_string (char *string1, char *string2, char *string3, char *string4) {
