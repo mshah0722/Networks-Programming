@@ -119,15 +119,15 @@ void displayUserSession (char **listOfSessions) {
 
     for (int i = 0; i < NUM_CLIENT; i++){
         if (listOfClients[i].loggedIn != 0){
-            int session_index = listOfClients[i].sessionId;
+            int session_idx = listOfClients[i].sessionId;
             printf(" %d->", i);
             
-            if (session_index == -1) {
+            if (session_idx == -1) {
                 printf("N/A");
             }
 
             else {
-                printf("%s", listOfSessions[session_index]);
+                printf("%s", listOfSessions[session_idx]);
             }
         }
     }
