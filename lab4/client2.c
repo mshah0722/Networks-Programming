@@ -187,20 +187,20 @@ BEGIN:
 				
 				goto SEND_MSG;
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
+				// //store values in message struct in appropriate data type
+                // char typeStr[5];
+                // char sizeStr[5];
+                // sprintf(typeStr, "%d", clientMsg.type);
+                // sprintf(sizeStr, "%d", clientMsg.size);
 
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				// //compress string to send to client
+                // char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
-				//send to server
-                write(sockfd, user_message, 1000);
+				// //send to server
+                // write(sockfd, user_message, 1000);
 				
-				//free memory
-                free(user_message);
+				// //free memory
+                // free(user_message);
             }
             
             else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command
@@ -218,20 +218,20 @@ BEGIN:
 				
 				goto SEND_MSG;
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
+				// //store values in message struct in appropriate data type
+                // char typeStr[5];
+                // char sizeStr[5];
+                // sprintf(typeStr, "%d", clientMsg.type);
+                // sprintf(sizeStr, "%d", clientMsg.size);
 
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				// //compress string to send to client
+                // char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
-				//send to server
-                write(sockfd, user_message, 1000);
+				// //send to server
+                // write(sockfd, user_message, 1000);
 				
-				//free memory
-                free(user_message);
+				// //free memory
+                // free(user_message);
             }
             
             else if (strcmp(inputPtr, "/leavesession") == 0){//leavession command
@@ -250,22 +250,22 @@ BEGIN:
 				
 				goto SEND_MSG;
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
+				// //store values in message struct in appropriate data type
+                // char typeStr[5];
+                // char sizeStr[5];
+                // sprintf(typeStr, "%d", clientMsg.type);
+                // sprintf(sizeStr, "%d", clientMsg.size);
 
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				// //compress string to send to client
+                // char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
                 
-				//send to server
-                write(sockfd, user_message, 1000);	
+				// //send to server
+                // write(sockfd, user_message, 1000);	
 				
-				//free memory
-                free(user_message);
+				// //free memory
+                // free(user_message);
 				
-                goto BEGIN;
+                // goto BEGIN;
             }
             
             else if (strcmp(inputPtr, "/list") == 0){//list command
@@ -281,20 +281,20 @@ BEGIN:
 
 				goto SEND_MSG;
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
+				// //store values in message struct in appropriate data type
+                // char typeStr[5];
+                // char sizeStr[5];
+                // sprintf(typeStr, "%d", clientMsg.type);
+                // sprintf(sizeStr, "%d", clientMsg.size);
 
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				// //compress string to send to client
+                // char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
-				//send to server
-                write(sockfd, user_message, 1000);
+				// //send to server
+                // write(sockfd, user_message, 1000);
 				
-				//free memory
-                free(user_message);
+				// //free memory
+                // free(user_message);
             }
 
 	
@@ -357,20 +357,20 @@ LOG_OUT:
 					
 					goto SEND_MSG;
 					
-					//store values in message struct in appropriate data type
-                    char typeStr[5];
-                    char sizeStr[5];
-                    sprintf(typeStr, "%d", clientMsg.type);
-                    sprintf(sizeStr, "%d", clientMsg.size);
+					// //store values in message struct in appropriate data type
+                    // char typeStr[5];
+                    // char sizeStr[5];
+                    // sprintf(typeStr, "%d", clientMsg.type);
+                    // sprintf(sizeStr, "%d", clientMsg.size);
 
-					//compress string to send to client
-                    char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+					// //compress string to send to client
+                    // char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 					
-					//send to server
-                    write(sockfd, user_message, 1000);
+					// //send to server
+                    // write(sockfd, user_message, 1000);
 					
-					//free memory
-                    free(user_message);
+					// //free memory
+                    // free(user_message);
                 }
                     
                 else {
@@ -378,7 +378,7 @@ LOG_OUT:
                     goto BEGIN;
                 }
             }
-SEND_MSG:	;
+SEND_MSG:	
                 if(clientMsg.type != LOGIN){
 				//store values in message struct in appropriate data type
                 char typeStr[5];
