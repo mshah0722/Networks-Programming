@@ -67,7 +67,7 @@ int main (int argc, char *argv[]){
 
     //Assigning a name binding to the socket 
     if (bindfd == -1) {
-        fprintf(stderr, "bind error\n");
+        fprintf(stderr, "Bind error\n");
         exit(0);
     }
 
@@ -76,7 +76,7 @@ int main (int argc, char *argv[]){
     int listenfd = listen(sockfd, 10);
 
     if (listenfd != 0) {
-        fprintf(stderr, "listen error");
+        fprintf(stderr, "Listen error");
         exit(0);
     }
 
@@ -120,14 +120,12 @@ int main (int argc, char *argv[]){
         if (readyfd == sockfd) {
             readyfd = accept(sockfd, (struct sockaddr*)client_addr, &server_size);
             if (readyfd < 0) {
-                fprintf(stderr, "server accept error");
+                fprintf(stderr, "Server accept error");
                 exit(0);
             }
         }
             
         read(readyfd, buffer, 1000);
-        
-        //printf("Message received from client ---> %s\n", buffer);
 
         char *inputPtr;
         inputPtr = strtok(buffer, ":");
