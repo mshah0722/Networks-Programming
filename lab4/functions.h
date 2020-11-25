@@ -56,6 +56,10 @@ typedef struct user_info {
     int sessionId;
 }USER_INFO;
 
+
+//List of client access
+USER_INFO listOfClients[NUM_CLIENT];
+
 char* struct_to_string (char *string1, char *string2, char *string3, char *string4) {
 
 	int string_length = strlen(string1) + strlen(string2) + strlen(string3) + strlen(string4) + 4;

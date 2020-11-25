@@ -1,8 +1,5 @@
 #include "functions.h"
 
-//List of client access
-USER_INFO listOfClients[NUM_CLIENT];
-
 int main (int argc, char *argv[]){
 
     int port;
