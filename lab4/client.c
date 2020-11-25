@@ -8,7 +8,6 @@ int main (int argc, char *argv[]){
 	//see if joined session
     bool session_joined = false;  
     int sockfd;//socket file desriptor
-    //printf(" ---> Welcome. ");
 
     fd_set read_fds;
 
@@ -29,35 +28,9 @@ BEGIN:
             FD_SET(sockfd, &read_fds);
         }
 
-        if (session_joined == false) {
-            if (user_logged_in >= 0) {
-                // printf("Please select from one of the following commands:\n\t");
-                // printf("/logout\n\t");
-                // printf("/joinsession sessionID\n\t");
-                // printf("/leavesession\n\t");
-                // printf("/createsession sessionID\n\t");
-                // printf("/list\n");
-            }
 
-            else{
-                // printf("Please choose to login or quit:");
-                // printf("\n\t/login id password serverIPAddress serverPort");
-                // printf("\n\t/quit\n");
-            }
-        }
 
-        if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) < 0) {
-            // printf("No actions in 10 seconds.");
-
-            // if (user_logged_in < 0) {
-                // goto BEGIN;
-            // }
-
-            // else{
-                // printf(" The user has been logged out.");
-                // goto log_out;
-            // }
-            
+        if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) < 0) {            
         }
 
         Message clientMsg;//message to send to server
@@ -130,7 +103,7 @@ BEGIN:
                 port = atoi(port_str);
 
 
-				//Creates a ipv4 dgram udp socket
+				//Creates a ipv4  socket
                 sockfd = socket(AF_INET, SOCK_STREAM, 0);
                 if (sockfd < 0) fprintf(stderr, "socket error\n");
 
@@ -185,23 +158,12 @@ BEGIN:
                 strcpy(clientMsg.data, inputPtr);//store session name
                 clientMsg.size = strlen(clientMsg.data);
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
-
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				goto SEND_MSG;
 				
-				//send to server
-                write(sockfd, user_message, 1000);
-				
-				//free memory
-                free(user_message);
             }
             
             else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command
+                if(session_joined == false){                
                 if (user_logged_in < 0) {
                     printf("User not logged in\n");
                     goto BEGIN;
@@ -214,21 +176,10 @@ BEGIN:
                 strcpy(clientMsg.data, inputPtr);// store session name
                 clientMsg.size = strlen(clientMsg.data);
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
-
-
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
-				
-				//send to server
-                write(sockfd, user_message, 1000);
-				
-				//free memory
-                free(user_message);
+				goto SEND_MSG;
+			   }	
+            else printf("You're already in a session");
+            goto BEGIN;
             }
             
             else if (strcmp(inputPtr, "/leavesession") == 0){//leavession command
@@ -242,24 +193,11 @@ BEGIN:
                 sprintf(clientMsg.source, "%d", user_logged_in);//set user id
                 strcpy(clientMsg.data, " ");
 				
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
-
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
-                
-				//send to server
-                write(sockfd, user_message, 1000);	
-				
-				//free memory
-                free(user_message);
-				
-				//set to zero
+				//set to false
                 session_joined = false;
-                goto BEGIN;
+				
+				goto SEND_MSG;
+				
             }
             
             else if (strcmp(inputPtr, "/list") == 0){//list command
@@ -273,24 +211,11 @@ BEGIN:
                 sprintf(clientMsg.source, "%d", user_logged_in);//set user id
                 strcpy(clientMsg.data, " ");
 
-				//store values in message struct in appropriate data type
-                char typeStr[5];
-                char sizeStr[5];
-                sprintf(typeStr, "%d", clientMsg.type);
-                sprintf(sizeStr, "%d", clientMsg.size);
-
-				//compress string to send to client
-                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
-                
+				goto SEND_MSG;
 				
-				//send to server
-                write(sockfd, user_message, 1000);
-				
-				//free memory
-                free(user_message);
             }
-            
 
+	
             else if (strcmp(inputPtr, "/logout") == 0){//logout command
 LOG_OUT:
                 if (user_logged_in < 0) {
@@ -347,28 +272,35 @@ LOG_OUT:
 
                     strcpy(clientMsg.data, message_line);
                     clientMsg.size = strlen(clientMsg.data);//data to be sent
-
-					//store values in message struct in appropriate data type
-                    char typeStr[5];
-                    char sizeStr[5];
-                    sprintf(typeStr, "%d", clientMsg.type);
-                    sprintf(sizeStr, "%d", clientMsg.size);
-
-					//compress string to send to client
-                    char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 					
-					//send to server
-                    write(sockfd, user_message, 1000);
-					
-					//free memory
-                    free(user_message);
+					goto SEND_MSG;
                 }
                     
                 else {
-                    printf("Invalid command. ");
+                    printf("Invalid command\n");
                     goto BEGIN;
                 }
             }
+SEND_MSG:	
+                if(clientMsg.type != LOGIN){
+				//store values in message struct in appropriate data type
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
+
+				//compress string to send to client
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
+				
+				//send to server
+                write(sockfd, user_message, 1000);
+				
+				//free memory
+                free(user_message);
+				
+			if(clientMsg.type == LEAVE_SESS )goto BEGIN;
+				
+			}
         } 
 
 		//recieve message and break it down and assign it to variables
@@ -429,7 +361,7 @@ LOG_OUT:
         }
 
         else if (serverMsg.type == MESSAGE){//<text> recieved
-            if (atoi(serverMsg.source) != user_logged_in) printf("guest%s: \"%s\"\n", serverMsg.source, serverMsg.data);
+            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: \"%s\"\n", serverMsg.source, serverMsg.data);
         }
     }
     return 0;
