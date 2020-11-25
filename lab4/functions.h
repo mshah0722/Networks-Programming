@@ -32,28 +32,28 @@ typedef struct message {
 }Message;
 
 typedef enum message_type {
-    LOGIN, // <client ID, password>
-    LO_ACK,
-    LO_NAK, // <reason for failure>
-    EXIT,
-    JOIN, // <session ID>
-    JN_ACK, // <session ID>
-    JN_NAK, // <session ID, reason for failure>
-    LEAVE_SESS, 
-    NEW_SESS, 
-    NS_ACK, // <session ID>
-    MESSAGE, // <message data>
-    QUERY,
-    QU_ACK // <users and session>
+    LOGIN, // <client ID, password>, Login with the server
+    LO_ACK, // Acknowledge successful login
+    LO_NAK, // <reason for failure>, Negative acknowledgement of login
+    EXIT, // Exit from server
+    JOIN, // <session ID>, Join a conference session
+    JN_ACK, // <session ID>, Acknowledge successful conference session join
+    JN_NAK, // <session ID, reason for failure>, Negative acknowledgement of joining the session
+    LEAVE_SESS, // Leave a conference session
+    NEW_SESS, // Create new conference session
+    NS_ACK, // <session ID>, Acknowledge new conference session
+    MESSAGE, // <message data>, Send a message to the session if it is received
+    QUERY, // Get a list of online users and available sessions
+    QU_ACK // <users and session>, Reply followed by a list of users online
 }Message_Type;
 
-typedef struct id_pass {
+typedef struct user_info {
     char id[100];
     char password[1000];
     int logged_in;
     int accept_fd;
     int session_id;
-}ID_Pass;
+}USER_INFO;
 
 char* struct_to_string (char *string1, char *string2, char *string3, char *string4) {
 

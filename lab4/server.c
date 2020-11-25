@@ -1,7 +1,7 @@
 #include "functions.h"
 
 // List of client access
-ID_Pass listOfClients[NUM_CLIENT];
+USER_INFO listOfClients[NUM_CLIENT];
 
 int main (int argc, char *argv[]){
 
