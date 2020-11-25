@@ -333,7 +333,7 @@ int main (int argc, char *argv[]){
                     sprintf(temp, "%d->", i);
                     
                     if (sessionIdx == -1) {
-                        strcpy(sess_name, "N/A ");
+                        strcpy(sess_name, "Not in a session ");
                     }
 
                     else {

@@ -123,7 +123,7 @@ void displayUserSession (char **listOfSessions) {
             printf(" %d->", i);
             
             if (session_idx == -1) {
-                printf("N/A");
+                printf("Not in a session");
             }
 
             else {
