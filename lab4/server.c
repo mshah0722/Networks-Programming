@@ -130,40 +130,40 @@ int main (int argc, char *argv[]){
 
         char *inputPtr;
         inputPtr = strtok(buffer, ":");
-        Message client_message;
-        Message server_message;
-        client_message.type = atoi(inputPtr); // type
+        Message clientMsg;
+        Message serverMsg;
+        clientMsg.type = atoi(inputPtr); // type
         int index = 1;
 
         while (inputPtr != NULL) {
             if (index == 1) { // size
                 inputPtr = strtok(NULL, ":");
-                client_message.size = atoi(inputPtr);
+                clientMsg.size = atoi(inputPtr);
                 index++;
             }
 
             else if (index == 2) { // source
                 inputPtr = strtok(NULL, ":");
-                strcpy(client_message.source, inputPtr);
+                strcpy(clientMsg.source, inputPtr);
                 index++;
             }
 
             else if (index == 3) { // data
                 inputPtr = strtok(NULL, ":");
-                strcpy(client_message.data, inputPtr);
+                strcpy(clientMsg.data, inputPtr);
                 break;
             }
         }
 
         memset(buffer, 0, sizeof(buffer));
 
-        if (client_message.type == LOGIN) {
+        if (clientMsg.type == LOGIN) {
 
             int flag = 0;
             int index;
 
             for (index = 0; index < NUM_CLIENT; index++) {
-                if ((strcmp(listOfClients[index].id, client_message.source) == 0) && (strcmp(listOfClients[index].password, client_message.data) == 0)) {
+                if ((strcmp(listOfClients[index].id, clientMsg.source) == 0) && (strcmp(listOfClients[index].password, clientMsg.data) == 0)) {
                     
                     if (listOfClients[index].logged_in) {
                         flag = -1;
@@ -180,15 +180,15 @@ int main (int argc, char *argv[]){
             }
 
             if (flag == 1) {
-                server_message.type = LO_ACK;
-                server_message.size = 0;
-                strcpy(server_message.source, client_message.source);
-                strcpy(server_message.data, "Success");
+                serverMsg.type = LO_ACK;
+                serverMsg.size = 0;
+                strcpy(serverMsg.source, clientMsg.source);
+                strcpy(serverMsg.data, "Success");
                 char type_string[5];
                 char size_string[5];
-                sprintf(type_string, "%d", server_message.type);
-                sprintf(size_string, "%d", server_message.size);
-                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+                sprintf(type_string, "%d", serverMsg.type);
+                sprintf(size_string, "%d", serverMsg.size);
+                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
                 printf("User %d logged in. ", index);
                 displayLoginStatus();
                 write(ready_fd, serv_message, 1000);
@@ -196,70 +196,70 @@ int main (int argc, char *argv[]){
             }
 
             else if (flag == 0){
-                server_message.type = LO_NAK;
-                server_message.size = 100;
-                strcpy(server_message.source, client_message.source);
-                strcpy(server_message.data, "User id/password is incorrect, please retry.\n");
+                serverMsg.type = LO_NAK;
+                serverMsg.size = 100;
+                strcpy(serverMsg.source, clientMsg.source);
+                strcpy(serverMsg.data, "User id/password is incorrect, please retry.\n");
                 char type_string[5];
                 char size_string[5];
-                sprintf(type_string, "%d", server_message.type);
-                sprintf(size_string, "%d", server_message.size);
-                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+                sprintf(type_string, "%d", serverMsg.type);
+                sprintf(size_string, "%d", serverMsg.size);
+                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
                 write(ready_fd, serv_message, 1000);
                 free(serv_message);
                 close(ready_fd);
             }
 
             else{
-                server_message.type = LO_NAK;
-                server_message.size = 100;
-                strcpy(server_message.source, client_message.source);
-                strcpy(server_message.data, "This user has already logged, please try a different one.\n");
+                serverMsg.type = LO_NAK;
+                serverMsg.size = 100;
+                strcpy(serverMsg.source, clientMsg.source);
+                strcpy(serverMsg.data, "This user has already logged, please try a different one.\n");
                 char type_string[5];
                 char size_string[5];
-                sprintf(type_string, "%d", server_message.type);
-                sprintf(size_string, "%d", server_message.size);
-                char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+                sprintf(type_string, "%d", serverMsg.type);
+                sprintf(size_string, "%d", serverMsg.size);
+                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
                 write(ready_fd, serv_message, 1000);
                 free(serv_message);
                 close(ready_fd);
             }
         }
 
-        else if (client_message.type == NEW_SESS){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == NEW_SESS){
+            int client_index = atoi(clientMsg.source);
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (session_list[i] == NULL) {
                     session_list[i] = (char *)malloc(100);
-                    strcpy(session_list[i], client_message.data);
+                    strcpy(session_list[i], clientMsg.data);
                     break;
                 }
             }
             
             displaySessionStatus(session_list);
 
-            server_message.type = NS_ACK;
-            server_message.size = 0;
-            strcpy(server_message.source, client_message.source);
-            strcpy(server_message.data, " ");
+            serverMsg.type = NS_ACK;
+            serverMsg.size = 0;
+            strcpy(serverMsg.source, clientMsg.source);
+            strcpy(serverMsg.data, " ");
 
             char type_string[5];
             char size_string[5];
-            sprintf(type_string, "%d", server_message.type);
-            sprintf(size_string, "%d", server_message.size);
-            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+            sprintf(type_string, "%d", serverMsg.type);
+            sprintf(size_string, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
 
-        else if (client_message.type == JOIN){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == JOIN){
+            int client_index = atoi(clientMsg.source);
             int success = 0;
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (session_list[i] != NULL) {
-                    if (strcmp(session_list[i], client_message.data) == 0){
+                    if (strcmp(session_list[i], clientMsg.data) == 0){
                         listOfClients[client_index].session_id = i;
                         success = 1;
                         break;
@@ -271,33 +271,33 @@ int main (int argc, char *argv[]){
                 printf("User %d joined %s. ", client_index, session_list[listOfClients[client_index].session_id]);
                 displayUserSession(session_list);
 
-                server_message.type = JN_ACK;
-                server_message.size = 0;
-                strcpy(server_message.source, client_message.source);
-                strcpy(server_message.data, " ");
+                serverMsg.type = JN_ACK;
+                serverMsg.size = 0;
+                strcpy(serverMsg.source, clientMsg.source);
+                strcpy(serverMsg.data, " ");
             }
 
             else{
-                printf("User %d failed to join %s. ", client_index, client_message.data);
+                printf("User %d failed to join %s. ", client_index, clientMsg.data);
                 displayUserSession(session_list);
 
-                server_message.type = JN_NAK;
-                server_message.size = 0;
-                strcpy(server_message.source, client_message.source);
-                strcpy(server_message.data, "Session does not exist.");
+                serverMsg.type = JN_NAK;
+                serverMsg.size = 0;
+                strcpy(serverMsg.source, clientMsg.source);
+                strcpy(serverMsg.data, "Session does not exist.");
             }
 
             char type_string[5];
             char size_string[5];
-            sprintf(type_string, "%d", server_message.type);
-            sprintf(size_string, "%d", server_message.size);
-            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+            sprintf(type_string, "%d", serverMsg.type);
+            sprintf(size_string, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
         
-        else if (client_message.type == LEAVE_SESS){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == LEAVE_SESS){
+            int client_index = atoi(clientMsg.source);
 
             printf("User %d left session %s. ", client_index, session_list[listOfClients[client_index].session_id]);
             listOfClients[client_index].session_id = -1;
@@ -305,23 +305,23 @@ int main (int argc, char *argv[]){
 
         }
         
-        else if (client_message.type == QUERY){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == QUERY){
+            int client_index = atoi(clientMsg.source);
 
-            server_message.type = QU_ACK;
-            strcpy(server_message.source, client_message.source);
+            serverMsg.type = QU_ACK;
+            strcpy(serverMsg.source, clientMsg.source);
             
-            memset(server_message.data, 0, MAX_DATA);
+            memset(serverMsg.data, 0, MAX_DATA);
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (session_list[i] != NULL){
                     char temp[100];
                     sprintf(temp, "%s ", session_list[i]);
-                    strcat(server_message.data, temp);
+                    strcat(serverMsg.data, temp);
                 }
             }
 
-            strcat(server_message.data, "\n\t");
+            strcat(serverMsg.data, "\n\t");
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfClients[i].logged_in != 0){
@@ -339,37 +339,37 @@ int main (int argc, char *argv[]){
                     }
 
                     strcat(temp, sess_name);
-                    strcat(server_message.data, temp);
+                    strcat(serverMsg.data, temp);
                 }
             }
 
-            server_message.size = strlen(server_message.data);
+            serverMsg.size = strlen(serverMsg.data);
 
             char type_string[5];
             char size_string[5];
-            sprintf(type_string, "%d", server_message.type);
-            sprintf(size_string, "%d", server_message.size);
-            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+            sprintf(type_string, "%d", serverMsg.type);
+            sprintf(size_string, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
             write(ready_fd, serv_message, 1000);
             free(serv_message);
         }
 
-        else if (client_message.type == MESSAGE){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == MESSAGE){
+            int client_index = atoi(clientMsg.source);
             int session_index = listOfClients[client_index].session_id;
 
-            server_message.type = MESSAGE;
-            strcpy(server_message.source, client_message.source);
-            strcpy(server_message.data, client_message.data);
+            serverMsg.type = MESSAGE;
+            strcpy(serverMsg.source, clientMsg.source);
+            strcpy(serverMsg.data, clientMsg.data);
 
-            server_message.size = strlen(server_message.data);
+            serverMsg.size = strlen(serverMsg.data);
 
             char type_string[5];
             char size_string[5];
-            sprintf(type_string, "%d", server_message.type);
-            sprintf(size_string, "%d", server_message.size);
+            sprintf(type_string, "%d", serverMsg.type);
+            sprintf(size_string, "%d", serverMsg.size);
 
-            char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
+            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
 
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfClients[i].session_id == session_index){
@@ -380,8 +380,8 @@ int main (int argc, char *argv[]){
             free(serv_message);
         }     
 
-        else if (client_message.type == EXIT){
-            int client_index = atoi(client_message.source);
+        else if (clientMsg.type == EXIT){
+            int client_index = atoi(clientMsg.source);
 
             listOfClients[client_index].logged_in = 0;
             printf("User %d quitted. ", client_index);
