@@ -374,11 +374,12 @@ LOG_OUT:
                 }
                     
                 else {
-                    printf("Invalid command. ");
+                    printf("Invalid command\n");
                     goto BEGIN;
                 }
             }
-SEND_MSG:	
+SEND_MSG:	;
+                if(clientMsg.type != LOGIN){
 				//store values in message struct in appropriate data type
                 char typeStr[5];
                 char sizeStr[5];
@@ -396,7 +397,7 @@ SEND_MSG:
 				
 			if(clientMsg.type == LEAVE_SESS )goto BEGIN;
 				
-			
+			}
         } 
 
 		//recieve message and break it down and assign it to variables
