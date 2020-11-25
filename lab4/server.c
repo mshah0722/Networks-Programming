@@ -330,9 +330,22 @@ int main (int argc, char *argv[]){
         //If the user wants to leave the session
         else if (clientMsg.type == LEAVE_SESS){
             int clientIdx = atoi(clientMsg.source);
+            int numOfClients = -1;
 
             //Display this message to the user
             printf("User %d left session %s. ", clientIdx, listOfSessions[listOfClients[clientIdx].sessionId]);
+
+            for (int i = 0; i < NUM_CLIENT; i++){
+                if (listOfSessions[i] != NULL) {
+                    if (strcmp(listOfSessions[i], clientMsg.data) == 0){
+                        listOfClients[clientIdx].sessionId -= 1;
+                        if(listOfClients[clientIdx].sessionId == -1){
+                            listOfSessions[i] = NULL;
+                        }
+                        break;
+                    }
+                }
+            }
 
             listOfClients[clientIdx].sessionId = -1;
 
