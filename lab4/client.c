@@ -14,7 +14,7 @@ int main (int argc, char *argv[]){
 
 BEGIN:
 
-    while(1) {
+    while(true) {
 		//Clear stream
         fflush(stdout);
 
