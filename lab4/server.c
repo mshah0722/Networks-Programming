@@ -243,7 +243,7 @@ int main (int argc, char *argv[]){
 
         //If the user wants to start a new session
         else if (clientMsg.type == NEW_SESS){
-            int client_idx = atoi(clientMsg.source);
+            int clientIdx = atoi(clientMsg.source);
 
             //Find an empty session
             for (int i = 0; i < NUM_CLIENT; i++){
@@ -278,14 +278,14 @@ int main (int argc, char *argv[]){
 
         //If the user wants to join an existing session
         else if (clientMsg.type == JOIN){
-            int client_idx = atoi(clientMsg.source);
+            int clientIdx = atoi(clientMsg.source);
             int success = 0;
 
             //Find the session in the list of sessions
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] != NULL) {
                     if (strcmp(listOfSessions[i], clientMsg.data) == 0){
-                        listOfClients[client_idx].sessionId = i;
+                        listOfClients[clientIdx].sessionId = i;
                         success = 1;
                         break;
                     }
@@ -294,7 +294,7 @@ int main (int argc, char *argv[]){
 
             //If the session does exist, allow the user to join, and then send the acknowledgement of joining
             if (success) {
-                printf("User %d joined %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
+                printf("User %d joined %s. ", clientIdx, listOfSessions[listOfClients[clientIdx].sessionId]);
                 displayUserSession(listOfSessions);
 
                 serverMsg.type = JN_ACK;
@@ -306,7 +306,7 @@ int main (int argc, char *argv[]){
 
             //If the session wasn't found in the list of active sessions, let the user know that they were unsuccessful
             else{
-                printf("User %d failed to join %s. ", client_idx, clientMsg.data);
+                printf("User %d failed to join %s. ", clientIdx, clientMsg.data);
                 displayUserSession(listOfSessions);
 
                 serverMsg.type = JN_NAK;
@@ -331,19 +331,19 @@ int main (int argc, char *argv[]){
         
         //If the user wants to leave the session
         else if (clientMsg.type == LEAVE_SESS){
-            int client_idx = atoi(clientMsg.source);
+            int clientIdx = atoi(clientMsg.source);
 
             //Display this message to the user
-            printf("User %d left session %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
+            printf("User %d left session %s. ", clientIdx, listOfSessions[listOfClients[clientIdx].sessionId]);
 
-            listOfClients[client_idx].sessionId = -1;
+            listOfClients[clientIdx].sessionId = -1;
 
             displayUserSession(listOfSessions);
         }
         
         //If the user wants to get a list of all the online users and all the available sessions
         else if (clientMsg.type == QUERY){
-            int client_idx = atoi(clientMsg.source);
+            int clientIdx = atoi(clientMsg.source);
 
             serverMsg.type = QU_ACK;
             
@@ -402,8 +402,8 @@ int main (int argc, char *argv[]){
 
         //If the user wants to send a message
         else if (clientMsg.type == MESSAGE){
-            int client_idx = atoi(clientMsg.source);
-            int sessionIdx = listOfClients[client_idx].sessionId;
+            int clientIdx = atoi(clientMsg.source);
+            int sessionIdx = listOfClients[clientIdx].sessionId;
 
             serverMsg.type = MESSAGE;
 
@@ -432,20 +432,20 @@ int main (int argc, char *argv[]){
 
         //If the user wants to leave the session
         else if (clientMsg.type == EXIT){
-            int client_idx = atoi(clientMsg.source);
+            int clientIdx = atoi(clientMsg.source);
 
-            listOfClients[client_idx].loggedIn = false;
+            listOfClients[clientIdx].loggedIn = false;
 
-            printf("User %d left the session. ", client_idx);
-            
+            printf("User %d left the session. ", clientIdx);
+
             displayLoginStatus();
 
             //Mark user as logged our and reset everything about the user
-            close(listOfClients[client_idx].acceptfd);
+            close(listOfClients[clientIdx].acceptfd);
 
-            listOfClients[client_idx].loggedIn = false;
-            listOfClients[client_idx].acceptfd = 0;
-            listOfClients[client_idx].sessionId = -1;
+            listOfClients[clientIdx].loggedIn = false;
+            listOfClients[clientIdx].acceptfd = 0;
+            listOfClients[clientIdx].sessionId = -1;
         }
     }
 
