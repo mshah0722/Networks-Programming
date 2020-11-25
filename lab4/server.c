@@ -88,9 +88,11 @@ int main (int argc, char *argv[]){
 
         int maxfd = sockfd;
 
-        //
+        //Updates the maxfd value
         for (int i = 0; i < NUM_CLIENT; i++){
-            if (maxfd < listOfClients[i].acceptfd) maxfd = listOfClients[i].acceptfd;
+            if (maxfd < listOfClients[i].acceptfd) {
+                maxfd = listOfClients[i].acceptfd;
+            }
 
             if (listOfClients[i].loggedIn)
                 FD_SET(listOfClients[i].acceptfd, &listen_set);
@@ -98,8 +100,9 @@ int main (int argc, char *argv[]){
 
         select(maxfd + 1, &listen_set, NULL, NULL, NULL);
 
-        //
         int readyfd = sockfd;
+
+        //Sets the readfd value to the first logged in clients' acceptfd
         for (int i = 0; i < NUM_CLIENT; i++){
             if (listOfClients[i].loggedIn) {
                 if (FD_ISSET(listOfClients[i].acceptfd, &listen_set)) {
@@ -136,20 +139,21 @@ int main (int argc, char *argv[]){
 
         int idx = 1;
 
+        //Getting the client message size, source, and data from the inputPtr
         while (inputPtr != NULL) {
-            if (idx == 1) { // size
+            if (idx == 1) {
                 inputPtr = strtok(NULL, ":");
                 clientMsg.size = atoi(inputPtr);
                 idx++;
             }
 
-            else if (idx == 2) { // source
+            else if (idx == 2) {
                 inputPtr = strtok(NULL, ":");
                 strcpy(clientMsg.source, inputPtr);
                 idx++;
             }
 
-            else if (idx == 3) { // data
+            else if (idx == 3) {
                 inputPtr = strtok(NULL, ":");
                 strcpy(clientMsg.data, inputPtr);
                 break;
@@ -158,11 +162,13 @@ int main (int argc, char *argv[]){
 
         memset(buffer, 0, sizeof(buffer));
 
+        //If the user uses a Login command
         if (clientMsg.type == LOGIN) {
 
             int flag = 0;
             int idx;
 
+            //Check if the user exists in the listOfClients
             for (idx = 0; idx < NUM_CLIENT; idx++) {
                 if ((strcmp(listOfClients[idx].id, clientMsg.source) == 0) && (strcmp(listOfClients[idx].password, clientMsg.data) == 0)) {
                     
@@ -180,6 +186,7 @@ int main (int argc, char *argv[]){
                 }
             }
 
+            //Login is successful 
             if (flag == 1) {
                 serverMsg.type = LO_ACK;
                 serverMsg.size = 0;
@@ -196,26 +203,21 @@ int main (int argc, char *argv[]){
                 free(serv_message);
             }
 
-            else if (flag == 0){
+            else {
                 serverMsg.type = LO_NAK;
                 serverMsg.size = 100;
                 strcpy(serverMsg.source, clientMsg.source);
-                strcpy(serverMsg.data, "User id/password is incorrect, please retry.\n");
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", serverMsg.type);
-                sprintf(size_string, "%d", serverMsg.size);
-                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
-                write(readyfd, serv_message, 1000);
-                free(serv_message);
-                close(readyfd);
-            }
 
-            else{
-                serverMsg.type = LO_NAK;
-                serverMsg.size = 100;
-                strcpy(serverMsg.source, clientMsg.source);
-                strcpy(serverMsg.data, "This user has already logged, please try a different one.\n");
+                //Incorrect Username and Password
+                if (flag == 0){
+                    strcpy(serverMsg.data, "User id/password is incorrect, please retry.\n");
+                }
+
+                //If user enters credentials of a user that is already logged in
+                else{
+                    strcpy(serverMsg.data, "This user has already logged, please try a different one.\n");
+                }
+            
                 char type_string[5];
                 char size_string[5];
                 sprintf(type_string, "%d", serverMsg.type);
@@ -227,9 +229,11 @@ int main (int argc, char *argv[]){
             }
         }
 
+        //If the user wants to start a new session
         else if (clientMsg.type == NEW_SESS){
             int client_idx = atoi(clientMsg.source);
 
+            //Find an empty session
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] == NULL) {
                     listOfSessions[i] = (char *)malloc(100);
