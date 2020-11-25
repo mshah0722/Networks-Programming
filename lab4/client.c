@@ -6,7 +6,7 @@ int main (int argc, char *argv[]){
     int user_logged_in = -1; 
 	
 	//see if joined session
-    int session_joined = 0;  
+    bool session_joined = false;  
     int sockfd;//socket file desriptor
     //printf(" ---> Welcome. ");
 
@@ -29,7 +29,7 @@ BEGIN:
             FD_SET(sockfd, &read_fds);
         }
 
-        if (!session_joined) {
+        if (session_joined == false) {
             if (user_logged_in >= 0) {
                 // printf("Please select from one of the following commands:\n\t");
                 // printf("/logout\n\t");
@@ -258,7 +258,7 @@ BEGIN:
                 free(user_message);
 				
 				//set to zero
-                session_joined = 0;
+                session_joined = false;
                 goto BEGIN;
             }
             
@@ -322,7 +322,7 @@ LOG_OUT:
                 close(sockfd);
 				
 				//reset values
-                session_joined = 0;
+                session_joined = false;
                 user_logged_in = -1;
                 max_fd = STDIN_FILENO;
                 FD_CLR(sockfd, &read_fds);
@@ -416,7 +416,7 @@ LOG_OUT:
         
         else if (serverMsg.type == JN_ACK){//joinsession ack
             printf("Session %s joinedn", clientMsg.data);
-            session_joined = 1;//set value since joined session
+            session_joined = true;//set value since joined session
         }
 
         else if (serverMsg.type == JN_NAK){//joinsesion nack
