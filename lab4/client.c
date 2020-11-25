@@ -154,13 +154,13 @@ BEGIN:
                 strcpy(clientMsg.data, login_password);
 				
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
                 
 				//send to server 
                 write(sockfd, user_message, 1000);
@@ -186,13 +186,13 @@ BEGIN:
                 clientMsg.size = strlen(clientMsg.data);
 				
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
 				//send to server
                 write(sockfd, user_message, 1000);
@@ -215,14 +215,14 @@ BEGIN:
                 clientMsg.size = strlen(clientMsg.data);
 				
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
 				//send to server
                 write(sockfd, user_message, 1000);
@@ -243,13 +243,13 @@ BEGIN:
                 strcpy(clientMsg.data, " ");
 				
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
                 
 				//send to server
                 write(sockfd, user_message, 1000);	
@@ -274,13 +274,13 @@ BEGIN:
                 strcpy(clientMsg.data, " ");
 
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
                 
 				
 				//send to server
@@ -304,13 +304,13 @@ LOG_OUT:
                 strcpy(clientMsg.data, " ");
 
 				//store values in message struct in appropriate data type
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", clientMsg.type);
-                sprintf(size_string, "%d", clientMsg.size);
+                char typeStr[5];
+                char sizeStr[5];
+                sprintf(typeStr, "%d", clientMsg.type);
+                sprintf(sizeStr, "%d", clientMsg.size);
 
 				//compress string to send to client
-                char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
                 
 				//send to server
                 write(sockfd, user_message, 1000);
@@ -349,13 +349,13 @@ LOG_OUT:
                     clientMsg.size = strlen(clientMsg.data);//data to be sent
 
 					//store values in message struct in appropriate data type
-                    char type_string[5];
-                    char size_string[5];
-                    sprintf(type_string, "%d", clientMsg.type);
-                    sprintf(size_string, "%d", clientMsg.size);
+                    char typeStr[5];
+                    char sizeStr[5];
+                    sprintf(typeStr, "%d", clientMsg.type);
+                    sprintf(sizeStr, "%d", clientMsg.size);
 
 					//compress string to send to client
-                    char *user_message = struct_to_string(type_string, size_string, clientMsg.source, clientMsg.data);
+                    char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 					
 					//send to server
                     write(sockfd, user_message, 1000);
@@ -371,6 +371,7 @@ LOG_OUT:
             }
         } 
 
+		//recieve message and break it down and assign it to variables
         char buffer[1000];
         memset(buffer, 0, 1000);
         read(sockfd, buffer, 1000);//read from the server
@@ -415,7 +416,7 @@ LOG_OUT:
         }
         
         else if (serverMsg.type == JN_ACK){//joinsession ack
-            printf("Session %s joinedn", clientMsg.data);
+            printf("Session %s joined\n", clientMsg.data);
             session_joined = true;//set value since joined session
         }
 
