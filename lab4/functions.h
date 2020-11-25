@@ -103,20 +103,20 @@ void displayLoginStatus() {
 
     for (int i = 0; i < NUM_CLIENT; i++) {
         printf(" %d->", i);
-        if (client_list[i].logged_in) printf("on");
+        if (listOfClients[i].logged_in) printf("on");
         else printf("off");
     }
 
     printf("\n");
 }
 
-void displayUserSession (char **session_list) {
+void displayUserSession (char **listOfSessions) {
 
     printf("User-session status:");
 
     for (int i = 0; i < NUM_CLIENT; i++){
-        if (client_list[i].logged_in != 0){
-            int session_index = client_list[i].session_id;
+        if (listOfClients[i].logged_in != 0){
+            int session_index = listOfClients[i].session_id;
             printf(" %d->", i);
             
             if (session_index == -1) {
@@ -124,7 +124,7 @@ void displayUserSession (char **session_list) {
             }
 
             else {
-                printf("%s", session_list[session_index]);
+                printf("%s", listOfSessions[session_index]);
             }
         }
     }
@@ -132,13 +132,13 @@ void displayUserSession (char **session_list) {
     printf("\n");
 }
 
-void displaySessionStatus (char **session_list) {
+void displaySessionStatus (char **listOfSessions) {
 
     printf("Session status:");
 
     for (int i = 0; i < NUM_CLIENT; i++){
-        if (session_list[i] != NULL){
-            printf(" %d->%s", i, session_list[i]);
+        if (listOfSessions[i] != NULL){
+            printf(" %d->%s", i, listOfSessions[i]);
         }
     }
 
