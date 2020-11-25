@@ -189,17 +189,18 @@ int main (int argc, char *argv[]){
                 serverMsg.size = 0;
                 strcpy(serverMsg.source, clientMsg.source);
                 strcpy(serverMsg.data, "Success");
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", serverMsg.type);
-                sprintf(size_string, "%d", serverMsg.size);
-                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+                char stringType[5];
+                char stringSize[5];
+                sprintf(stringType, "%d", serverMsg.type);
+                sprintf(stringSize, "%d", serverMsg.size);
+                char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
                 printf("User %d logged in. ", idx);
                 displayLoginStatus();
                 write(readyfd, serv_message, 1000);
                 free(serv_message);
             }
 
+            //Login is unsuccessful
             else {
                 serverMsg.type = LO_NAK;
                 serverMsg.size = 100;
@@ -215,11 +216,11 @@ int main (int argc, char *argv[]){
                     strcpy(serverMsg.data, "This user has already logged, please try a different one.\n");
                 }
             
-                char type_string[5];
-                char size_string[5];
-                sprintf(type_string, "%d", serverMsg.type);
-                sprintf(size_string, "%d", serverMsg.size);
-                char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+                char stringType[5];
+                char stringSize[5];
+                sprintf(stringType, "%d", serverMsg.type);
+                sprintf(stringSize, "%d", serverMsg.size);
+                char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
                 write(readyfd, serv_message, 1000);
                 free(serv_message);
                 close(readyfd);
@@ -241,24 +242,28 @@ int main (int argc, char *argv[]){
             
             displaySessionStatus(listOfSessions);
 
+            //Send a New Session Acknowledgement
             serverMsg.type = NS_ACK;
             serverMsg.size = 0;
             strcpy(serverMsg.source, clientMsg.source);
             strcpy(serverMsg.data, " ");
 
-            char type_string[5];
-            char size_string[5];
-            sprintf(type_string, "%d", serverMsg.type);
-            sprintf(size_string, "%d", serverMsg.size);
-            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+            //Send a message acknowledging the creation of the session
+            char stringType[5];
+            char stringSize[5];
+            sprintf(stringType, "%d", serverMsg.type);
+            sprintf(stringSize, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
 
+        //If the user wants to join an existing session
         else if (clientMsg.type == JOIN){
             int client_idx = atoi(clientMsg.source);
             int success = 0;
 
+            //Find the session in the list of sessions
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] != NULL) {
                     if (strcmp(listOfSessions[i], clientMsg.data) == 0){
@@ -269,6 +274,7 @@ int main (int argc, char *argv[]){
                 }
             }
 
+            //If the session does exist, allow the user to join, and then send the acknowledgement of joining
             if (success) {
                 printf("User %d joined %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
                 displayUserSession(listOfSessions);
@@ -279,6 +285,7 @@ int main (int argc, char *argv[]){
                 strcpy(serverMsg.data, " ");
             }
 
+            //If the session wasn't found in the list of active sessions, let the user know that they were unsuccessful
             else{
                 printf("User %d failed to join %s. ", client_idx, clientMsg.data);
                 displayUserSession(listOfSessions);
@@ -289,24 +296,27 @@ int main (int argc, char *argv[]){
                 strcpy(serverMsg.data, "Session does not exist.");
             }
 
-            char type_string[5];
-            char size_string[5];
-            sprintf(type_string, "%d", serverMsg.type);
-            sprintf(size_string, "%d", serverMsg.size);
-            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+            //Display the message to the user
+            char stringType[5];
+            char stringSize[5];
+            sprintf(stringType, "%d", serverMsg.type);
+            sprintf(stringSize, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
         
+        //If the user wants to leave the session
         else if (clientMsg.type == LEAVE_SESS){
             int client_idx = atoi(clientMsg.source);
 
+            //Display this message to the user
             printf("User %d left session %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
             listOfClients[client_idx].sessionId = -1;
             displayUserSession(listOfSessions);
-
         }
         
+        //If the user wants to get a list of all the online users and all the available sessions
         else if (clientMsg.type == QUERY){
             int client_idx = atoi(clientMsg.source);
 
@@ -315,6 +325,7 @@ int main (int argc, char *argv[]){
             
             memset(serverMsg.data, 0, MAX_DATA);
 
+            //Get a list of all the active sessions
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] != NULL){
                     char temp[100];
@@ -325,6 +336,7 @@ int main (int argc, char *argv[]){
 
             strcat(serverMsg.data, "\n\t");
 
+            //Get a list of all the logged in clients
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfClients[i].loggedIn){
                     int sessionIdx = listOfClients[i].sessionId;
@@ -332,6 +344,7 @@ int main (int argc, char *argv[]){
                     char sess_name[20];
                     sprintf(temp, "%d->", i);
                     
+                    //Also list whether each user is in a session or not
                     if (sessionIdx == -1) {
                         strcpy(sess_name, "Not in a session ");
                     }
@@ -347,15 +360,17 @@ int main (int argc, char *argv[]){
 
             serverMsg.size = strlen(serverMsg.data);
 
-            char type_string[5];
-            char size_string[5];
-            sprintf(type_string, "%d", serverMsg.type);
-            sprintf(size_string, "%d", serverMsg.size);
-            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+            //Display this message to the screen
+            char stringType[5];
+            char stringSize[5];
+            sprintf(stringType, "%d", serverMsg.type);
+            sprintf(stringSize, "%d", serverMsg.size);
+            char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
 
+        //If the user wants to send a message
         else if (clientMsg.type == MESSAGE){
             int client_idx = atoi(clientMsg.source);
             int sessionIdx = listOfClients[client_idx].sessionId;
@@ -366,14 +381,14 @@ int main (int argc, char *argv[]){
 
             serverMsg.size = strlen(serverMsg.data);
 
-            char type_string[5];
-            char size_string[5];
-            sprintf(type_string, "%d", serverMsg.type);
-            sprintf(size_string, "%d", serverMsg.size);
+            char stringType[5];
+            char stringSize[5];
+            sprintf(stringType, "%d", serverMsg.type);
+            sprintf(stringSize, "%d", serverMsg.size);
 
-            char *serv_message = struct_to_string(type_string, size_string, serverMsg.source, serverMsg.data);
+            char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
 
-            //
+            //If other users are in the same session as this user, send them the same message
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfClients[i].sessionId == sessionIdx){
                     write(listOfClients[i].acceptfd, serv_message, 1000);
@@ -383,7 +398,7 @@ int main (int argc, char *argv[]){
             free(serv_message);
         }     
 
-        //
+        //If the user wants to leave the session
         else if (clientMsg.type == EXIT){
             int client_idx = atoi(clientMsg.source);
 
@@ -391,6 +406,7 @@ int main (int argc, char *argv[]){
             printf("User %d left the session. ", client_idx);
             displayLoginStatus();
 
+            //Mark user as logged our and reset everything about the user
             close(listOfClients[client_idx].acceptfd);
             listOfClients[client_idx].loggedIn = false;
             listOfClients[client_idx].acceptfd = 0;
