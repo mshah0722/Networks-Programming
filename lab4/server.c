@@ -388,7 +388,7 @@ int main (int argc, char *argv[]){
             int client_idx = atoi(clientMsg.source);
 
             listOfClients[client_idx].loggedIn = false;
-            printf("User %d quitted. ", client_idx);
+            printf("User %d left the session. ", client_idx);
             displayLoginStatus();
 
             close(listOfClients[client_idx].acceptfd);
