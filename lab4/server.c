@@ -1,57 +1,7 @@
 #include "functions.h"
 
-#define NUM_CLIENT 5
-
 // List of client access
-ID_Pass client_list[NUM_CLIENT];
-
-void Print_Login_Status() {
-
-    printf("User status:");
-
-    for (int i = 0; i < NUM_CLIENT; i++) {
-        printf(" %d->", i);
-        if (client_list[i].logged_in) printf("on");
-        else printf("off");
-    }
-
-    printf("\n");
-}
-
-void Print_User_Session (char **session_list) {
-
-    printf("User-session status:");
-
-    for (int i = 0; i < NUM_CLIENT; i++){
-        if (client_list[i].logged_in != 0){
-            int session_index = client_list[i].session_id;
-            printf(" %d->", i);
-            
-            if (session_index == -1) {
-                printf("N/A");
-            }
-
-            else {
-                printf("%s", session_list[session_index]);
-            }
-        }
-    }
-    
-    printf("\n");
-}
-
-void Print_Session_Status (char **session_list) {
-
-    printf("Session status:");
-
-    for (int i = 0; i < NUM_CLIENT; i++){
-        if (session_list[i] != NULL){
-            printf(" %d->%s", i, session_list[i]);
-        }
-    }
-
-    printf("\n");
-}
+ID_Pass listOfClients[NUM_CLIENT];
 
 int main (int argc, char *argv[]){
 
@@ -77,21 +27,21 @@ int main (int argc, char *argv[]){
 
     // Setting the credentials for each client
     for (int i = 0; i < NUM_CLIENT; i++) {
-        strcpy(client_list[i].id, "guestX");
-        client_list[i].id[5] = i + '0';
+        strcpy(listOfClients[i].id, "User_X");
+        listOfClients[i].id[5] = i + '0';
         char password[4];
         sprintf(password, "%d%d%d%d", i, i, i, i);
-        strcpy(client_list[i].password, password);
-        client_list[i].logged_in = 0;
-        client_list[i].accept_fd = 0;
-        client_list[i].session_id = -1;
+        strcpy(listOfClients[i].password, password);
+        listOfClients[i].logged_in = 0;
+        listOfClients[i].accept_fd = 0;
+        listOfClients[i].session_id = -1;
     }
 
     for (int i = 0; i < NUM_CLIENT; i++) {
-        printf("User No.%d: %s, password: %s\n", i + 1, client_list[i].id, client_list[i].password);
+        printf("Client No.%d: %s, password: %s\n", i + 1, listOfClients[i].id, listOfClients[i].password);
     }
 
-    Print_Login_Status();
+    displayLoginStatus();
 
     char *session_list[NUM_CLIENT];
     for (int i = 0; i < NUM_CLIENT; i++) {
@@ -99,9 +49,9 @@ int main (int argc, char *argv[]){
     }
     
     // check if a TCP socket can be created
-    int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (socket_fd < 0){
+    if (sockfd < 0){
         fprintf(stderr, "socket error\n");
     }
 
@@ -117,19 +67,19 @@ int main (int argc, char *argv[]){
     server_addr->sin_family = AF_INET;
     unsigned int server_size = sizeof(struct sockaddr);
 
-    int bind_fd = bind(socket_fd, (const struct sockaddr*)server_addr, sizeof(struct sockaddr));
+    int bindfd = bind(sockfd, (const struct sockaddr*)server_addr, sizeof(struct sockaddr));
 
     // assigning a name(binding) to the socket 
-    if (bind_fd == -1) {
+    if (bindfd == -1) {
         fprintf(stderr, "bind error\n");
         exit(0);
     }
 
     fd_set listen_set;
 
-    int listen_fd = listen(socket_fd, 10);
+    int listenfd = listen(sockfd, 10);
 
-    if (listen_fd != 0) {
+    if (listenfd != 0) {
         fprintf(stderr, "listen error");
         exit(0);
     }
@@ -138,23 +88,23 @@ int main (int argc, char *argv[]){
 
         FD_ZERO(&listen_set);
 
-        FD_SET(socket_fd, &listen_set);
+        FD_SET(sockfd, &listen_set);
 
-        int max_fd = socket_fd;
+        int max_fd = sockfd;
         for (int i = 0; i < NUM_CLIENT; i++){
-            if (max_fd < client_list[i].accept_fd) max_fd = client_list[i].accept_fd;
+            if (max_fd < listOfClients[i].accept_fd) max_fd = listOfClients[i].accept_fd;
 
-            if (client_list[i].logged_in != 0)
-                FD_SET(client_list[i].accept_fd, &listen_set);
+            if (listOfClients[i].logged_in != 0)
+                FD_SET(listOfClients[i].accept_fd, &listen_set);
         }
 
         select(max_fd + 1, &listen_set, NULL, NULL, NULL);
 
-        int ready_fd = socket_fd;
+        int ready_fd = sockfd;
         for (int i = 0; i < NUM_CLIENT; i++){
-            if (client_list[i].logged_in == 1) {
-                if (FD_ISSET(client_list[i].accept_fd, &listen_set)) {
-                    ready_fd = client_list[i].accept_fd;
+            if (listOfClients[i].logged_in == 1) {
+                if (FD_ISSET(listOfClients[i].accept_fd, &listen_set)) {
+                    ready_fd = listOfClients[i].accept_fd;
                     break;
                 }
             }
@@ -164,9 +114,9 @@ int main (int argc, char *argv[]){
         
         memset(buffer, 0, sizeof(buffer));
 
-        if (ready_fd == socket_fd) { // new login request
+        if (ready_fd == sockfd) { // new login request
 
-            ready_fd = accept(socket_fd, (struct sockaddr*)client_addr, &server_size);
+            ready_fd = accept(sockfd, (struct sockaddr*)client_addr, &server_size);
             if (ready_fd < 0) {
                 fprintf(stderr, "server accept error");
                 exit(0);
@@ -178,29 +128,29 @@ int main (int argc, char *argv[]){
         
         printf("Message received from client ---> %s\n", buffer);
 
-        char *token;
-        token = strtok(buffer, ":");
+        char *inputPtr;
+        inputPtr = strtok(buffer, ":");
         Message client_message;
         Message server_message;
-        client_message.type = atoi(token); // type
+        client_message.type = atoi(inputPtr); // type
         int index = 1;
 
-        while (token != NULL) {
+        while (inputPtr != NULL) {
             if (index == 1) { // size
-                token = strtok(NULL, ":");
-                client_message.size = atoi(token);
+                inputPtr = strtok(NULL, ":");
+                client_message.size = atoi(inputPtr);
                 index++;
             }
 
             else if (index == 2) { // source
-                token = strtok(NULL, ":");
-                strcpy(client_message.source, token);
+                inputPtr = strtok(NULL, ":");
+                strcpy(client_message.source, inputPtr);
                 index++;
             }
 
             else if (index == 3) { // data
-                token = strtok(NULL, ":");
-                strcpy(client_message.data, token);
+                inputPtr = strtok(NULL, ":");
+                strcpy(client_message.data, inputPtr);
                 break;
             }
         }
@@ -213,16 +163,16 @@ int main (int argc, char *argv[]){
             int index;
 
             for (index = 0; index < NUM_CLIENT; index++) {
-                if ((strcmp(client_list[index].id, client_message.source) == 0) && (strcmp(client_list[index].password, client_message.data) == 0)) {
+                if ((strcmp(listOfClients[index].id, client_message.source) == 0) && (strcmp(listOfClients[index].password, client_message.data) == 0)) {
                     
-                    if (client_list[index].logged_in) {
+                    if (listOfClients[index].logged_in) {
                         flag = -1;
                     }
 
                     else {
                         flag = 1;
-                        client_list[index].logged_in = 1;
-                        client_list[index].accept_fd = ready_fd;
+                        listOfClients[index].logged_in = 1;
+                        listOfClients[index].accept_fd = ready_fd;
                     }
 
                     break;
@@ -240,7 +190,7 @@ int main (int argc, char *argv[]){
                 sprintf(size_string, "%d", server_message.size);
                 char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
                 printf("User %d logged in. ", index);
-                Print_Login_Status();
+                displayLoginStatus();
                 write(ready_fd, serv_message, 1000);
                 free(serv_message);
             }
@@ -287,7 +237,7 @@ int main (int argc, char *argv[]){
                 }
             }
             
-            Print_Session_Status(session_list);
+            displaySessionStatus(session_list);
 
             server_message.type = NS_ACK;
             server_message.size = 0;
@@ -310,7 +260,7 @@ int main (int argc, char *argv[]){
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (session_list[i] != NULL) {
                     if (strcmp(session_list[i], client_message.data) == 0){
-                        client_list[client_index].session_id = i;
+                        listOfClients[client_index].session_id = i;
                         success = 1;
                         break;
                     }
@@ -318,8 +268,8 @@ int main (int argc, char *argv[]){
             }
 
             if (success) {
-                printf("User %d joined %s. ", client_index, session_list[client_list[client_index].session_id]);
-                Print_User_Session(session_list);
+                printf("User %d joined %s. ", client_index, session_list[listOfClients[client_index].session_id]);
+                displayUserSession(session_list);
 
                 server_message.type = JN_ACK;
                 server_message.size = 0;
@@ -329,7 +279,7 @@ int main (int argc, char *argv[]){
 
             else{
                 printf("User %d failed to join %s. ", client_index, client_message.data);
-                Print_User_Session(session_list);
+                displayUserSession(session_list);
 
                 server_message.type = JN_NAK;
                 server_message.size = 0;
@@ -349,9 +299,9 @@ int main (int argc, char *argv[]){
         else if (client_message.type == LEAVE_SESS){
             int client_index = atoi(client_message.source);
 
-            printf("User %d left session %s. ", client_index, session_list[client_list[client_index].session_id]);
-            client_list[client_index].session_id = -1;
-            Print_User_Session(session_list);
+            printf("User %d left session %s. ", client_index, session_list[listOfClients[client_index].session_id]);
+            listOfClients[client_index].session_id = -1;
+            displayUserSession(session_list);
 
         }
         
@@ -374,8 +324,8 @@ int main (int argc, char *argv[]){
             strcat(server_message.data, "\n\t");
 
             for (int i = 0; i < NUM_CLIENT; i++){
-                if (client_list[i].logged_in != 0){
-                    int session_index = client_list[i].session_id;
+                if (listOfClients[i].logged_in != 0){
+                    int session_index = listOfClients[i].session_id;
                     char temp[100];
                     char sess_name[20];
                     sprintf(temp, "%d->", i);
@@ -406,7 +356,7 @@ int main (int argc, char *argv[]){
 
         else if (client_message.type == MESSAGE){
             int client_index = atoi(client_message.source);
-            int session_index = client_list[client_index].session_id;
+            int session_index = listOfClients[client_index].session_id;
 
             server_message.type = MESSAGE;
             strcpy(server_message.source, client_message.source);
@@ -422,8 +372,8 @@ int main (int argc, char *argv[]){
             char *serv_message = struct_to_string(type_string, size_string, server_message.source, server_message.data);
 
             for (int i = 0; i < NUM_CLIENT; i++){
-                if (client_list[i].session_id == session_index){
-                    write(client_list[i].accept_fd, serv_message, 1000);
+                if (listOfClients[i].session_id == session_index){
+                    write(listOfClients[i].accept_fd, serv_message, 1000);
                 }
             }
             
@@ -433,14 +383,14 @@ int main (int argc, char *argv[]){
         else if (client_message.type == EXIT){
             int client_index = atoi(client_message.source);
 
-            client_list[client_index].logged_in = 0;
+            listOfClients[client_index].logged_in = 0;
             printf("User %d quitted. ", client_index);
-            Print_Login_Status();
+            displayLoginStatus();
 
-            close(client_list[client_index].accept_fd);
-            client_list[client_index].logged_in = 0;
-            client_list[client_index].accept_fd = 0;
-            client_list[client_index].session_id = -1;
+            close(listOfClients[client_index].accept_fd);
+            listOfClients[client_index].logged_in = 0;
+            listOfClients[client_index].accept_fd = 0;
+            listOfClients[client_index].session_id = -1;
         }
     }
 

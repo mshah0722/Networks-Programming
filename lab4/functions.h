@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 
+#define NUM_CLIENT 5
 #define MAX_NAME 100
 #define MAX_DATA 1000
 
@@ -93,6 +94,54 @@ char* struct_to_string (char *string1, char *string2, char *string3, char *strin
     string[i+j+k+l] = '\0';
 
 	return string;
+}
+
+void displayLoginStatus() {
+
+    printf("User status:");
+
+    for (int i = 0; i < NUM_CLIENT; i++) {
+        printf(" %d->", i);
+        if (client_list[i].logged_in) printf("on");
+        else printf("off");
+    }
+
+    printf("\n");
+}
+
+void displayUserSession (char **session_list) {
+
+    printf("User-session status:");
+
+    for (int i = 0; i < NUM_CLIENT; i++){
+        if (client_list[i].logged_in != 0){
+            int session_index = client_list[i].session_id;
+            printf(" %d->", i);
+            
+            if (session_index == -1) {
+                printf("N/A");
+            }
+
+            else {
+                printf("%s", session_list[session_index]);
+            }
+        }
+    }
+    
+    printf("\n");
+}
+
+void displaySessionStatus (char **session_list) {
+
+    printf("Session status:");
+
+    for (int i = 0; i < NUM_CLIENT; i++){
+        if (session_list[i] != NULL){
+            printf(" %d->%s", i, session_list[i]);
+        }
+    }
+
+    printf("\n");
 }
 
 #endif
