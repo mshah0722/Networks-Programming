@@ -19,9 +19,12 @@ int main (int argc, char *argv[]){
     for (int i = 0; i < NUM_CLIENT; i++) {
         strcpy(listOfClients[i].id, "User_X");
         listOfClients[i].id[5] = i + '0';
+
         char password[4];
+
         sprintf(password, "%d%d%d%d", i, i, i, i);
         strcpy(listOfClients[i].password, password);
+
         listOfClients[i].loggedIn = false;
         listOfClients[i].acceptfd = 0;
         listOfClients[i].sessionId = -1;
@@ -58,8 +61,8 @@ int main (int argc, char *argv[]){
     server_addr->sin_addr.s_addr = INADDR_ANY;
     server_addr->sin_port = htons(port);
     server_addr->sin_family = AF_INET;
-    unsigned int server_size = sizeof(struct sockaddr);
 
+    unsigned int server_size = sizeof(struct sockaddr);
     int bindfd = bind(sockfd, (const struct sockaddr*)server_addr, sizeof(struct sockaddr));
 
     //Assigning a name binding to the socket 
@@ -187,15 +190,22 @@ int main (int argc, char *argv[]){
             if (flag == 1) {
                 serverMsg.type = LO_ACK;
                 serverMsg.size = 0;
+
                 strcpy(serverMsg.source, clientMsg.source);
                 strcpy(serverMsg.data, "Success");
+
                 char stringType[5];
                 char stringSize[5];
+
                 sprintf(stringType, "%d", serverMsg.type);
                 sprintf(stringSize, "%d", serverMsg.size);
+
                 char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
+
                 printf("User %d logged in. ", idx);
+
                 displayLoginStatus();
+
                 write(readyfd, serv_message, 1000);
                 free(serv_message);
             }
@@ -204,6 +214,7 @@ int main (int argc, char *argv[]){
             else {
                 serverMsg.type = LO_NAK;
                 serverMsg.size = 100;
+
                 strcpy(serverMsg.source, clientMsg.source);
 
                 //Incorrect Username and Password
@@ -218,9 +229,12 @@ int main (int argc, char *argv[]){
             
                 char stringType[5];
                 char stringSize[5];
+
                 sprintf(stringType, "%d", serverMsg.type);
                 sprintf(stringSize, "%d", serverMsg.size);
+
                 char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
+
                 write(readyfd, serv_message, 1000);
                 free(serv_message);
                 close(readyfd);
@@ -245,15 +259,19 @@ int main (int argc, char *argv[]){
             //Send a New Session Acknowledgement
             serverMsg.type = NS_ACK;
             serverMsg.size = 0;
+
             strcpy(serverMsg.source, clientMsg.source);
             strcpy(serverMsg.data, " ");
 
             //Send a message acknowledging the creation of the session
             char stringType[5];
             char stringSize[5];
+
             sprintf(stringType, "%d", serverMsg.type);
             sprintf(stringSize, "%d", serverMsg.size);
+
             char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
+
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
@@ -281,6 +299,7 @@ int main (int argc, char *argv[]){
 
                 serverMsg.type = JN_ACK;
                 serverMsg.size = 0;
+
                 strcpy(serverMsg.source, clientMsg.source);
                 strcpy(serverMsg.data, " ");
             }
@@ -292,6 +311,7 @@ int main (int argc, char *argv[]){
 
                 serverMsg.type = JN_NAK;
                 serverMsg.size = 0;
+
                 strcpy(serverMsg.source, clientMsg.source);
                 strcpy(serverMsg.data, "Session does not exist.");
             }
@@ -299,9 +319,12 @@ int main (int argc, char *argv[]){
             //Display the message to the user
             char stringType[5];
             char stringSize[5];
+
             sprintf(stringType, "%d", serverMsg.type);
             sprintf(stringSize, "%d", serverMsg.size);
+
             char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
+
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
@@ -312,7 +335,9 @@ int main (int argc, char *argv[]){
 
             //Display this message to the user
             printf("User %d left session %s. ", client_idx, listOfSessions[listOfClients[client_idx].sessionId]);
+
             listOfClients[client_idx].sessionId = -1;
+
             displayUserSession(listOfSessions);
         }
         
@@ -321,8 +346,8 @@ int main (int argc, char *argv[]){
             int client_idx = atoi(clientMsg.source);
 
             serverMsg.type = QU_ACK;
-            strcpy(serverMsg.source, clientMsg.source);
             
+            strcpy(serverMsg.source, clientMsg.source);
             memset(serverMsg.data, 0, MAX_DATA);
 
             //Get a list of all the active sessions
@@ -340,8 +365,10 @@ int main (int argc, char *argv[]){
             for (int i = 0; i < NUM_CLIENT; i++){
                 if (listOfClients[i].loggedIn){
                     int sessionIdx = listOfClients[i].sessionId;
+
                     char temp[100];
                     char sess_name[20];
+
                     sprintf(temp, "%d->", i);
                     
                     //Also list whether each user is in a session or not
@@ -363,9 +390,12 @@ int main (int argc, char *argv[]){
             //Display this message to the screen
             char stringType[5];
             char stringSize[5];
+
             sprintf(stringType, "%d", serverMsg.type);
             sprintf(stringSize, "%d", serverMsg.size);
+
             char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
+
             write(readyfd, serv_message, 1000);
             free(serv_message);
         }
@@ -376,6 +406,7 @@ int main (int argc, char *argv[]){
             int sessionIdx = listOfClients[client_idx].sessionId;
 
             serverMsg.type = MESSAGE;
+
             strcpy(serverMsg.source, clientMsg.source);
             strcpy(serverMsg.data, clientMsg.data);
 
@@ -383,6 +414,7 @@ int main (int argc, char *argv[]){
 
             char stringType[5];
             char stringSize[5];
+
             sprintf(stringType, "%d", serverMsg.type);
             sprintf(stringSize, "%d", serverMsg.size);
 
@@ -403,11 +435,14 @@ int main (int argc, char *argv[]){
             int client_idx = atoi(clientMsg.source);
 
             listOfClients[client_idx].loggedIn = false;
+
             printf("User %d left the session. ", client_idx);
+            
             displayLoginStatus();
 
             //Mark user as logged our and reset everything about the user
             close(listOfClients[client_idx].acceptfd);
+
             listOfClients[client_idx].loggedIn = false;
             listOfClients[client_idx].acceptfd = 0;
             listOfClients[client_idx].sessionId = -1;
