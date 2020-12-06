@@ -6,7 +6,7 @@ int main (int argc, char *argv[]){
     int user_logged_in = -1; 
 	int count=0;
 	//see if joined session
-    bool session_joined = false;  
+    int session_joined = 0;  
     int sockfd;//socket file desriptor
 
     fd_set read_fds;
@@ -171,8 +171,7 @@ BEGIN:
 				
             }
             
-            else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command
-                if(session_joined == false){                
+            else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command           
                 if (user_logged_in < 0) {
                     printf("User not logged in\n");
                     goto BEGIN;
@@ -186,9 +185,7 @@ BEGIN:
                 clientMsg.size = strlen(clientMsg.data);
 				
 				goto SEND_MSG;
-			   }	
-            else printf("You're already in a session");
-            goto BEGIN;
+
             }
             
             else if (strcmp(inputPtr, "/leavesession") == 0){//leavession command
@@ -196,14 +193,16 @@ BEGIN:
                     printf("User not logged in\n");
                     goto BEGIN;
                 }
+				
+				inputPtr = strtok(NULL, " \n");// read input
+                strcpy(clientMsg.data, inputPtr);// store session name
+                clientMsg.size = strlen(clientMsg.data);
 
                 clientMsg.type = LEAVE_SESS;//set msg type
-                clientMsg.size = 0;
                 sprintf(clientMsg.source, "%d", user_logged_in);//set user id
-                strcpy(clientMsg.data, " ");
 				
-				//set to false
-                session_joined = false;
+				//reduce session joined count
+                session_joined--;
 				
 				goto SEND_MSG;
 				
@@ -259,7 +258,7 @@ LOG_OUT:
                 close(sockfd);
 				
 				//reset values
-                session_joined = false;
+                session_joined = 0;
                 user_logged_in = -1;
                 max_fd = STDIN_FILENO;
                 FD_CLR(sockfd, &read_fds);
@@ -278,7 +277,7 @@ LOG_OUT:
             }
 
             else {
-                if (session_joined) {//<text>
+                if (session_joined > 0) {//<text>
                     clientMsg.type = MESSAGE;//set msg type
                     sprintf(clientMsg.source, "%d", user_logged_in);//set user id
 
@@ -374,7 +373,7 @@ SEND_MSG:
         
         else if (serverMsg.type == JN_ACK){//joinsession ack
             printf("Session %s joined\n", clientMsg.data);
-            session_joined = true;//set value since joined session
+            session_joined++;//set value since joined session
         }
 
         else if (serverMsg.type == JN_NAK){//joinsesion nack
