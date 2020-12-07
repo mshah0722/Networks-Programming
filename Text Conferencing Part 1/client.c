@@ -4,9 +4,9 @@ int main (int argc, char *argv[]){
 	
     //see which and if user is logged in
     int user_logged_in = -1; 
-	
+	int count=0;
 	//see if joined session
-    bool session_joined = false;  
+    int session_joined = 0;  
     int sockfd;//socket file desriptor
 
     fd_set read_fds;
@@ -14,6 +14,7 @@ int main (int argc, char *argv[]){
 BEGIN:
 
     while(true) {
+        count++;
 		//Clear stream
         fflush(stdout);
 
@@ -28,9 +29,17 @@ BEGIN:
             FD_SET(sockfd, &read_fds);
         }
 
+     struct timeval timeout;
+
+     if(user_logged_in <0) timeout.tv_sec = 60;
+     else timeout.tv_sec = 60;
+     timeout.tv_usec = 0;
+
+     //setsockopt(STDIN_FILENO, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout));
 
 
-        if (select(max_fd + 1, &read_fds, NULL, NULL, NULL) < 0) {            
+        if (select(max_fd + 1, &read_fds, NULL, NULL, &timeout) ) {  
+        
         }
 
         Message clientMsg;//message to send to server
@@ -162,8 +171,7 @@ BEGIN:
 				
             }
             
-            else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command
-                if(session_joined == false){                
+            else if (strcmp(inputPtr, "/joinsession") == 0){// joinsession command           
                 if (user_logged_in < 0) {
                     printf("User not logged in\n");
                     goto BEGIN;
@@ -177,9 +185,7 @@ BEGIN:
                 clientMsg.size = strlen(clientMsg.data);
 				
 				goto SEND_MSG;
-			   }	
-            else printf("You're already in a session");
-            goto BEGIN;
+
             }
             
             else if (strcmp(inputPtr, "/leavesession") == 0){//leavession command
@@ -187,14 +193,17 @@ BEGIN:
                     printf("User not logged in\n");
                     goto BEGIN;
                 }
+				
+				inputPtr = strtok(NULL, " \n");// read input
+                strcpy(clientMsg.data, inputPtr);// store session name
+                clientMsg.size = strlen(clientMsg.data);
+                printf("%s",clientMsg.data);
 
                 clientMsg.type = LEAVE_SESS;//set msg type
-                clientMsg.size = 0;
                 sprintf(clientMsg.source, "%d", user_logged_in);//set user id
-                strcpy(clientMsg.data, " ");
 				
-				//set to false
-                session_joined = false;
+				//reduce session joined count
+                session_joined--;
 				
 				goto SEND_MSG;
 				
@@ -239,6 +248,9 @@ LOG_OUT:
                 
 				//send to server
                 write(sockfd, user_message, 1000);
+
+                printf("The user has been logged out\n");
+                printf("You have 30 seconds if you wish to log back in\n");
 				
 				//free memory
                 free(user_message);
@@ -247,7 +259,7 @@ LOG_OUT:
                 close(sockfd);
 				
 				//reset values
-                session_joined = false;
+                session_joined = 0;
                 user_logged_in = -1;
                 max_fd = STDIN_FILENO;
                 FD_CLR(sockfd, &read_fds);
@@ -266,7 +278,7 @@ LOG_OUT:
             }
 
             else {
-                if (session_joined) {//<text>
+                if (session_joined > 0) {//<text>
                     clientMsg.type = MESSAGE;//set msg type
                     sprintf(clientMsg.source, "%d", user_logged_in);//set user id
 
@@ -292,9 +304,11 @@ SEND_MSG:
 				//compress string to send to client
                 char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
-				//send to server
+                //send to server
                 write(sockfd, user_message, 1000);
-				
+                
+                printf("sent\n");				
+
 				//free memory
                 free(user_message);
 				
@@ -302,6 +316,19 @@ SEND_MSG:
 				
 			}
         } 
+        /*else{
+
+            if (user_logged_in < 0) {
+            printf("No actions in 30 seconds.\nEnding session\n");
+                exit(0); 
+            }
+            else
+            {
+                printf("No actions in 20 seconds.\n");
+                goto LOG_OUT;
+            }  
+            
+        }*/
 
 		//recieve message and break it down and assign it to variables
         char buffer[1000];
@@ -349,7 +376,7 @@ SEND_MSG:
         
         else if (serverMsg.type == JN_ACK){//joinsession ack
             printf("Session %s joined\n", clientMsg.data);
-            session_joined = true;//set value since joined session
+            session_joined++;//set value since joined session
         }
 
         else if (serverMsg.type == JN_NAK){//joinsesion nack
@@ -361,7 +388,7 @@ SEND_MSG:
         }
 
         else if (serverMsg.type == MESSAGE){//<text> recieved
-            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: \"%s\"\n", serverMsg.source, serverMsg.data);
+            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: in session \"%s\"\n", serverMsg.source, serverMsg.data);
         }
     }
     return 0;

@@ -53,7 +53,7 @@ typedef struct user_info {
     char password[1000];
     bool loggedIn;
     int acceptfd;
-    int sessionId;
+    int sessionId[NUM_CLIENT];
 }USER_INFO;
 
 //List of client access
@@ -115,19 +115,27 @@ void displayLoginStatus() {
 
 void displayUserSession (char **listOfSessions) {
 
-    printf("User-session status:");
+	int count=0;
+    printf("User-session status:\n");
 
     for (int i = 0; i < NUM_CLIENT; i++){
-        if (listOfClients[i].loggedIn != 0){
-            int session_idx = listOfClients[i].sessionId;
-            printf(" %d:", i);
-            
-            if (session_idx == -1) {
-                printf("Not in a session");
-            }
-
-            else {
-                printf("%s", listOfSessions[session_idx]);
+        if (listOfClients[i].loggedIn == true){
+			count=0;
+			for(int j=0;j<NUM_CLIENT;j++){
+				int session_idx = listOfClients[i].sessionId[j];
+				
+				if (session_idx == -1) {
+					count++;
+					//printf("Not in a session");
+				}
+				else {
+                    printf("User %d:", i);
+					printf("%s\n", listOfSessions[session_idx]);
+				}
+			}
+			if(count == NUM_CLIENT){
+                printf(" %d:", i);
+                printf("Not in a session\n");
             }
         }
     }
