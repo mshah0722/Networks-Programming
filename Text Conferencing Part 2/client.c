@@ -31,8 +31,8 @@ BEGIN:
 
      struct timeval timeout;
 
-     if(user_logged_in <0) timeout.tv_sec = 30;
-     else timeout.tv_sec = 20;
+     if(user_logged_in <0) timeout.tv_sec = 60;
+     else timeout.tv_sec = 60;
      timeout.tv_usec = 0;
 
      //setsockopt(STDIN_FILENO, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout));
@@ -197,6 +197,7 @@ BEGIN:
 				inputPtr = strtok(NULL, " \n");// read input
                 strcpy(clientMsg.data, inputPtr);// store session name
                 clientMsg.size = strlen(clientMsg.data);
+                printf("%s",clientMsg.data);
 
                 clientMsg.type = LEAVE_SESS;//set msg type
                 sprintf(clientMsg.source, "%d", user_logged_in);//set user id
@@ -303,9 +304,11 @@ SEND_MSG:
 				//compress string to send to client
                 char *user_message = struct_to_string(typeStr, sizeStr, clientMsg.source, clientMsg.data);
 				
-				//send to server
+                //send to server
                 write(sockfd, user_message, 1000);
-				
+                
+                printf("sent\n");				
+
 				//free memory
                 free(user_message);
 				

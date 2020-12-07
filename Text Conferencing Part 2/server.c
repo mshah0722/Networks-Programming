@@ -27,7 +27,13 @@ int main (int argc, char *argv[]){
 
         listOfClients[i].loggedIn = false;
         listOfClients[i].acceptfd = 0;
-        listOfClients[i].sessionId = -1;
+
+        for(int i=0;i<NUM_CLIENT;i++){
+             for(int j=0;j<NUM_CLIENT;j++){
+                listOfClients[i].sessionId[j] = -1;
+             }
+        }
+
 
         //Print client usernames and passwords on the screen
         printf("Client No.%d: %s, password: %s\n", i + 1, listOfClients[i].id, listOfClients[i].password);
@@ -136,18 +142,21 @@ int main (int argc, char *argv[]){
         clientMsg.type = atoi(inputPtr);
 
         int idx = 1;
-
+        printf("before parse\n");
         //Getting the client message size, source, and data from the inputPtr
         while (inputPtr != NULL) {
             if (idx == 1) {
                 inputPtr = strtok(NULL, ":");
+printf("%s size",inputPtr);
                 clientMsg.size = atoi(inputPtr);
+printf("%d size",clientMsg.size);
                 idx++;
             }
 
             else if (idx == 2) {
                 inputPtr = strtok(NULL, ":");
                 strcpy(clientMsg.source, inputPtr);
+printf("%s source",clientMsg.source);
                 idx++;
             }
 
@@ -158,6 +167,7 @@ int main (int argc, char *argv[]){
             }
         }
 
+        printf("%s parse",clientMsg.data);
         memset(buffer, 0, sizeof(buffer));
 
         //If the user uses a Login command
@@ -278,7 +288,7 @@ int main (int argc, char *argv[]){
         else if (clientMsg.type == JOIN){
             int clientIdx = atoi(clientMsg.source);
             int success = 0;
-			int i=0
+			int i=0;
             //Find the session in the list of sessions
             for ( i = 0; i < NUM_CLIENT; i++){
                 if (listOfSessions[i] != NULL) {
@@ -288,6 +298,8 @@ int main (int argc, char *argv[]){
 								printf("You're already in this session\n");//if already joined session and trying to join again
 								goto JOINED;								
 							}
+                        }
+                         for(int j=0;j<NUM_CLIENT;j++){
 							if(listOfClients[clientIdx].sessionId[j] == -1){
 								listOfClients[clientIdx].sessionId[j] = i;
 								success = 1;
@@ -339,9 +351,11 @@ JOINED:
         else if (clientMsg.type == LEAVE_SESS){
             int clientIdx = atoi(clientMsg.source);
 			int sessID=-1;
-			itn clientSessID=-1;
+			int clientSessID=-1;
+            printf("in leave sess");
+            printf("%s",clientMsg.data);
 			for(int i=0;i<NUM_CLIENT;i++){
-				if(listOfSessions[i] == clientMsg.data)sessID=i;
+				if(strcmp(listOfSessions[i], clientMsg.data) == 0)sessID=i;
 			}
 			for(int i=0;i<NUM_CLIENT;i++){
 				if(listOfClients[clientIdx].sessionId[i]== sessID)clientSessID=sessID;
@@ -390,13 +404,14 @@ JOINED:
 
             //Get a list of all the logged in clients
             for (int i = 0; i < NUM_CLIENT; i++){
-				count=0;
+				count=0;						
+                char temp[100];
+				char sess_name[20];
+
                 if (listOfClients[i].loggedIn){
 					for(int j=0;j<NUM_CLIENT;j++){
 						int sessionIdx = listOfClients[i].sessionId[j];
 
-						char temp[100];
-						char sess_name[20];
 
 						sprintf(temp, "%d:", i);
 						
@@ -406,11 +421,15 @@ JOINED:
 						}
 						else {
 							sprintf(sess_name, "%s \n", listOfSessions[sessionIdx]);
+                            strcat(temp, sess_name);
+                            strcat(serverMsg.data, temp);
 						}
 					}
-					if(count == NUM_CLIENT)strcpy(sess_name, "Not in a session \n");
-					strcat(temp, sess_name);
-					strcat(serverMsg.data, temp);
+					if(count == NUM_CLIENT){
+                        strcpy(sess_name, "Not in a session \n");
+					    strcat(temp, sess_name);
+					    strcat(serverMsg.data, temp);
+                    }
 					
                 }
 				
@@ -447,7 +466,7 @@ JOINED:
 
             sprintf(stringType, "%d", serverMsg.type);
             sprintf(stringSize, "%d", serverMsg.size);
-
+            //char *serv_message;
             //If other users are in the same session as this user, send them the same message
 			for(int j=0;j<NUM_CLIENT;j++){
 				int sessionIdx = listOfClients[clientIdx].sessionId[j];
@@ -457,12 +476,13 @@ JOINED:
 							strcat(listOfSessions[sessionIdx],serverMsg.data);
 							char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
 							write(listOfClients[i].acceptfd, serv_message, 1000);
+                            free(serv_message);
 						}
 					}
 				}
 			}
             
-            free(serv_message);
+            
         }     
 
         //If the user wants to leave the session
