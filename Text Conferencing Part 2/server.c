@@ -413,30 +413,29 @@ JOINED:
 				char sess_name[20];
 
                 if (listOfClients[i].loggedIn){
-					for(int j=0;j<NUM_CLIENT;j++){
+
+                    for(int j = 0; j < NUM_CLIENT; j++){
 						int sessionIdx = listOfClients[i].sessionId[j];
-
-
-						sprintf(temp, "%d:", i);
 						
 						//Also list whether each user is in a session or not
 						if (sessionIdx == -1) {
 							count++;
 						}
 						else {
+                            sprintf(temp, "%d:", i);
 							sprintf(sess_name, "%s \n", listOfSessions[sessionIdx]);
                             strcat(temp, sess_name);
                             strcat(serverMsg.data, temp);
 						}
 					}
 					if(count == NUM_CLIENT){
+                        sprintf(temp, "%d:", i);
                         strcpy(sess_name, "Not in a session \n");
 					    strcat(temp, sess_name);
 					    strcat(serverMsg.data, temp);
                     }
 					
                 }
-				
             }
 			
             serverMsg.size = strlen(serverMsg.data);
