@@ -147,16 +147,16 @@ int main (int argc, char *argv[]){
         while (inputPtr != NULL) {
             if (idx == 1) {
                 inputPtr = strtok(NULL, ":");
-printf("%s size",inputPtr);
+                printf("%s size",inputPtr);
                 clientMsg.size = atoi(inputPtr);
-printf("%d size",clientMsg.size);
+                printf("%d size",clientMsg.size);
                 idx++;
             }
 
             else if (idx == 2) {
                 inputPtr = strtok(NULL, ":");
                 strcpy(clientMsg.source, inputPtr);
-printf("%s source",clientMsg.source);
+                printf("%s source",clientMsg.source);
                 idx++;
             }
 
@@ -299,7 +299,7 @@ printf("%s source",clientMsg.source);
 								goto JOINED;								
 							}
                         }
-                         for(int j=0;j<NUM_CLIENT;j++){
+                        for(int j=0;j<NUM_CLIENT;j++){
 							if(listOfClients[clientIdx].sessionId[j] == -1){
 								listOfClients[clientIdx].sessionId[j] = i;
 								success = 1;
@@ -355,10 +355,14 @@ JOINED:
             printf("in leave sess");
             printf("%s",clientMsg.data);
 			for(int i=0;i<NUM_CLIENT;i++){
-				if(strcmp(listOfSessions[i], clientMsg.data) == 0)sessID=i;
+				if(strcmp(listOfSessions[i], clientMsg.data) == 0){
+                    sessID=i;
+                }
 			}
 			for(int i=0;i<NUM_CLIENT;i++){
-				if(listOfClients[clientIdx].sessionId[i]== sessID)clientSessID=sessID;
+				if(listOfClients[clientIdx].sessionId[i]== sessID){
+                    clientSessID=sessID;
+                }
 			}
             int NumClients=0;
 
@@ -367,7 +371,7 @@ JOINED:
             
             
             for (int i = 0; i < NUM_CLIENT; i++){//find how many clients are in the session that we want to leave
-				for(int j=0;j<NUM_CLIENT;j++){
+				for(int j = 0; j < NUM_CLIENT; j++){
 					if(listOfClients[i].sessionId[j] == listOfClients[clientIdx].sessionId[clientSessID]){
 						NumClients++;
 					}
@@ -376,7 +380,7 @@ JOINED:
 
             if(NumClients == 1 ){//thers only 1 client in the session            
                 listOfSessions[sessID] = NULL;
-               }
+            }
             
             listOfClients[clientIdx].sessionId[clientSessID] = -1;
             displayUserSession(listOfSessions);
