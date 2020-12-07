@@ -193,14 +193,14 @@ BEGIN:
                     printf("User not logged in\n");
                     goto BEGIN;
                 }
-				
+
+                clientMsg.type = LEAVE_SESS;//set msg type
+                sprintf(clientMsg.source, "%d", user_logged_in);//set user id
+
 				inputPtr = strtok(NULL, " \n");// read input
                 strcpy(clientMsg.data, inputPtr);// store session name
                 clientMsg.size = strlen(clientMsg.data);
                 printf("%s",clientMsg.data);
-
-                clientMsg.type = LEAVE_SESS;//set msg type
-                sprintf(clientMsg.source, "%d", user_logged_in);//set user id
 				
 				//reduce session joined count
                 session_joined--;
@@ -388,7 +388,9 @@ SEND_MSG:
         }
 
         else if (serverMsg.type == MESSAGE){//<text> recieved
-            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: in session \"%s\"\n", serverMsg.source, serverMsg.data);
+            if (atoi(serverMsg.source) != user_logged_in){
+                printf("User_%s in session: %s\n", serverMsg.source, serverMsg.data);
+            } 
         }
     }
     return 0;

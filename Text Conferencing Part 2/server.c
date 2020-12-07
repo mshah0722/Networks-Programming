@@ -480,8 +480,9 @@ JOINED:
 						    if (listOfClients[i].sessionId[k] == sessionIdx){
                                 char temp[MAX_DATA];
                                 strcpy(temp,listOfSessions[sessionIdx]);
-                                strcat(temp,"  ");
-							    strcat(temp,serverMsg.data);
+                                strcat(temp,"  \"");
+							    strcat(temp, serverMsg.data);
+                                strcat(temp,"\"");
 							    char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, temp);
 							    write(listOfClients[i].acceptfd, serv_message, 1000);
                                 free(serv_message);
