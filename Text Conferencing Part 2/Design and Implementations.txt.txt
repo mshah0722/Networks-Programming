@@ -1,0 +1,16 @@
+Text Conferencing Lab
+Section: Additional Features
+
+For this lab we have created 2 new functionalities:
+1) Client is able to join multiple sessions. 
+2) User Timeout automatically disconnects inactive clients
+
+With the creation of the first added functionality, the user is able to get a list of all the clients and which
+session they are in. This list is constantly updated and reflects the latest information.
+The user is also able to send messages in multiple session and communicate with the respective students
+
+For the second functionality, we implemented a timeout functionality for users. This functionality works when
+the user is logged out and is inactive as well as when they are logged in and they are inactive. This 
+feature allows users to protect theit profile, and protect their chat history. If the users are logged in and
+they timeout, then they are first logged out, and then they are exited from their session. If the user has not 
+yet logged in and they timeout, they are also exitted from the session.
