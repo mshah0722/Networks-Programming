@@ -142,21 +142,21 @@ int main (int argc, char *argv[]){
         clientMsg.type = atoi(inputPtr);
 
         int idx = 1;
-        printf("before parse\n");
+
         //Getting the client message size, source, and data from the inputPtr
         while (inputPtr != NULL) {
             if (idx == 1) {
                 inputPtr = strtok(NULL, ":");
-                printf("%s size",inputPtr);
+                
                 clientMsg.size = atoi(inputPtr);
-                printf("%d size",clientMsg.size);
+                
                 idx++;
             }
 
             else if (idx == 2) {
                 inputPtr = strtok(NULL, ":");
                 strcpy(clientMsg.source, inputPtr);
-                printf("%s source",clientMsg.source);
+                
                 idx++;
             }
 
@@ -167,7 +167,6 @@ int main (int argc, char *argv[]){
             }
         }
 
-        printf("%s parse",clientMsg.data);
         memset(buffer, 0, sizeof(buffer));
 
         //If the user uses a Login command
@@ -352,8 +351,6 @@ JOINED:
             int clientIdx = atoi(clientMsg.source);
 			int sessID=-1;
 			int clientSessID=-1;
-            printf("in leave sess");
-            printf("%s",clientMsg.data);
 			for(int i=0;i<NUM_CLIENT;i++){
 				if(strcmp(listOfSessions[i], clientMsg.data) == 0){
                     sessID=i;
@@ -408,7 +405,7 @@ JOINED:
 
             //Get a list of all the logged in clients
             for (int i = 0; i < NUM_CLIENT; i++){
-				count=0;						
+				count = 0;						
                 char temp[100];
 				char sess_name[20];
 
@@ -479,7 +476,7 @@ JOINED:
 						    if (listOfClients[i].sessionId[k] == sessionIdx){
                                 char temp[MAX_DATA];
                                 strcpy(temp,listOfSessions[sessionIdx]);
-                                strcat(temp,"  \"");
+                                strcat(temp," -> \"");
 							    strcat(temp, serverMsg.data);
                                 strcat(temp,"\"");
 							    char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, temp);
@@ -518,3 +515,4 @@ JOINED:
 
     return 0;
 }
+

@@ -31,8 +31,8 @@ BEGIN:
 
      struct timeval timeout;
 
-     if(user_logged_in <0) timeout.tv_sec = 60;
-     else timeout.tv_sec = 60;
+     if(user_logged_in <0) timeout.tv_sec = 20;
+     else timeout.tv_sec = 30;
      timeout.tv_usec = 0;
 
      //setsockopt(STDIN_FILENO, SOL_SOCKET, SO_RCVTIMEO,&timeout,sizeof(timeout));
@@ -156,7 +156,7 @@ BEGIN:
 
             else if (strcmp(inputPtr, "/createsession") == 0){ //createsession command
                 if (user_logged_in < 0) {
-                    printf("User not logged\n");
+                    printf("User not logged in\n");
                     goto BEGIN;
                 }
                 
@@ -200,7 +200,6 @@ BEGIN:
 				inputPtr = strtok(NULL, " \n");// read input
                 strcpy(clientMsg.data, inputPtr);// store session name
                 clientMsg.size = strlen(clientMsg.data);
-                printf("%s",clientMsg.data);
 				
 				//reduce session joined count
                 session_joined--;
@@ -250,7 +249,7 @@ LOG_OUT:
                 write(sockfd, user_message, 1000);
 
                 printf("The user has been logged out\n");
-                printf("You have 30 seconds if you wish to log back in\n");
+                printf("You have 20 seconds if you wish to log back in\n");
 				
 				//free memory
                 free(user_message);
@@ -307,7 +306,7 @@ SEND_MSG:
                 //send to server
                 write(sockfd, user_message, 1000);
                 
-                printf("sent\n");				
+                printf("Sent\n");				
 
 				//free memory
                 free(user_message);
@@ -316,20 +315,21 @@ SEND_MSG:
 				
 			}
         } 
-        /*else{
+        /*
+        else{
 
             if (user_logged_in < 0) {
-            printf("No actions in 30 seconds.\nEnding session\n");
+            printf("No actions in 20 seconds.\nEnding session\n");
                 exit(0); 
             }
-            else
-            {
-                printf("No actions in 20 seconds.\n");
+
+            else{
+                printf("No actions in 30 seconds.\n");
                 goto LOG_OUT;
             }  
             
-        }*/
-
+        }
+        */
 		//recieve message and break it down and assign it to variables
         char buffer[1000];
         memset(buffer, 0, 1000);
@@ -389,9 +389,10 @@ SEND_MSG:
 
         else if (serverMsg.type == MESSAGE){//<text> recieved
             if (atoi(serverMsg.source) != user_logged_in){
-                printf("User_%s in session: %s\n", serverMsg.source, serverMsg.data);
+                printf("User_%s in session %s\n", serverMsg.source, serverMsg.data);
             } 
         }
     }
     return 0;
 }
+
