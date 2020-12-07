@@ -1,0 +1,11 @@
+client 1:login, create session 1, create 2, join 1 , join 2
+
+client 2 : login, join 1
+
+client 1: hello
+
+client 2: reply hello
+
+clinet 3:login, join 2, hello
+
+client 1: hello everyone
