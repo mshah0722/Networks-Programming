@@ -470,16 +470,22 @@ JOINED:
             //If other users are in the same session as this user, send them the same message
 			for(int j=0;j<NUM_CLIENT;j++){
 				int sessionIdx = listOfClients[clientIdx].sessionId[j];
-				for (int i = 0; i < NUM_CLIENT; i++){
-					for(int k=0;k<NUM_CLIENT;k++){
-						if (listOfClients[i].sessionId[k] == sessionIdx){
-							strcat(listOfSessions[sessionIdx],serverMsg.data);
-							char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, serverMsg.data);
-							write(listOfClients[i].acceptfd, serv_message, 1000);
-                            free(serv_message);
-						}
-					}
-				}
+                if(sessionIdx != -1){
+				    for (int i = 0; i < NUM_CLIENT; i++){
+					    for(int k=0;k<NUM_CLIENT;k++){
+						    if (listOfClients[i].sessionId[k] == sessionIdx){
+                                char temp[MAX_DATA];
+                                strcpy(temp,listOfSessions[sessionIdx]);
+                                strcat(temp,"  ");
+							    strcat(temp,serverMsg.data);
+							    char *serv_message = struct_to_string(stringType, stringSize, serverMsg.source, temp);
+							    write(listOfClients[i].acceptfd, serv_message, 1000);
+                                free(serv_message);
+                                //free(temp);
+						    }
+					    }
+				    }
+                }
 			}
             
             

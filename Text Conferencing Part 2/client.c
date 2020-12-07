@@ -316,7 +316,7 @@ SEND_MSG:
 				
 			}
         } 
-        else{
+        /*else{
 
             if (user_logged_in < 0) {
             printf("No actions in 30 seconds.\nEnding session\n");
@@ -328,7 +328,7 @@ SEND_MSG:
                 goto LOG_OUT;
             }  
             
-        }
+        }*/
 
 		//recieve message and break it down and assign it to variables
         char buffer[1000];
@@ -388,7 +388,7 @@ SEND_MSG:
         }
 
         else if (serverMsg.type == MESSAGE){//<text> recieved
-            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: \"%s\"\n", serverMsg.source, serverMsg.data);
+            if (atoi(serverMsg.source) != user_logged_in) printf("User_%s: in session \"%s\"\n", serverMsg.source, serverMsg.data);
         }
     }
     return 0;
